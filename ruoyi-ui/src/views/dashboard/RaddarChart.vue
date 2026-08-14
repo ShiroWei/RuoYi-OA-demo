@@ -23,11 +23,25 @@ export default {
     height: {
       type: String,
       default: '300px'
+    },
+    chartData: {
+      type: Object,
+      default: () => ({})
     }
   },
   data() {
     return {
       chart: null
+    }
+  },
+  watch: {
+    chartData: {
+      deep: true,
+      handler(val) {
+        if (this.chart && val && val.series) {
+          this.setOptions(val)
+        }
+      }
     }
   },
   mounted() {
@@ -43,9 +57,29 @@ export default {
     this.chart = null
   },
   methods: {
+    defaultData() {
+      return {
+        indicator: [
+          { name: '审批效率', max: 100 },
+          { name: '考勤达标', max: 100 },
+          { name: '任务完成', max: 100 },
+          { name: '协作沟通', max: 100 },
+          { name: '文档规范', max: 100 },
+          { name: '流程合规', max: 100 }
+        ],
+        series: [81, 92, 76, 68, 85, 88]
+      }
+    },
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-
+      if (this.chartData && this.chartData.series) {
+        this.setOptions(this.chartData)
+      } else {
+        this.setOptions(this.defaultData())
+      }
+    },
+    setOptions(chartData) {
+      const { indicator, series } = chartData
       this.chart.setOption({
         tooltip: {
           trigger: 'axis',
@@ -67,19 +101,12 @@ export default {
               shadowOffsetY: 15
             }
           },
-          indicator: [
-            { name: 'Sales', max: 10000 },
-            { name: 'Administration', max: 20000 },
-            { name: 'Information Techology', max: 20000 },
-            { name: 'Customer Support', max: 20000 },
-            { name: 'Development', max: 20000 },
-            { name: 'Marketing', max: 20000 }
-          ]
+          indicator
         },
         legend: {
           left: 'center',
           bottom: '10',
-          data: ['Allocated Budget', 'Expected Spending', 'Actual Spending']
+          data: ['办公效率']
         },
         series: [{
           type: 'radar',
@@ -95,19 +122,11 @@ export default {
           },
           data: [
             {
-              value: [5000, 7000, 12000, 11000, 15000, 14000],
-              name: 'Allocated Budget'
-            },
-            {
-              value: [4000, 9000, 15000, 15000, 13000, 11000],
-              name: 'Expected Spending'
-            },
-            {
-              value: [5500, 11000, 12000, 15000, 12000, 12000],
-              name: 'Actual Spending'
+              value: series,
+              name: '办公效率'
             }
           ],
-          animationDuration: animationDuration
+          animationDuration
         }]
       })
     }

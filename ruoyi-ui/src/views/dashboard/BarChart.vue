@@ -23,11 +23,25 @@ export default {
     height: {
       type: String,
       default: '300px'
+    },
+    chartData: {
+      type: Object,
+      default: () => ({})
     }
   },
   data() {
     return {
       chart: null
+    }
+  },
+  watch: {
+    chartData: {
+      deep: true,
+      handler(val) {
+        if (this.chart && val && val.pageA) {
+          this.setOptions(val)
+        }
+      }
     }
   },
   mounted() {
@@ -43,15 +57,38 @@ export default {
     this.chart = null
   },
   methods: {
+    defaultData() {
+      return {
+        pageA: [30, 42, 35, 51, 49, 62, 69, 91, 126],
+        pageB: [20, 32, 25, 41, 39, 52, 59, 71, 96],
+        pageC: [10, 22, 15, 31, 29, 42, 49, 61, 76]
+      }
+    },
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-
+      if (this.chartData && this.chartData.pageA) {
+        this.setOptions(this.chartData)
+      } else {
+        this.setOptions(this.defaultData())
+      }
+    },
+    setOptions(chartData) {
+      const { pageA, pageB, pageC } = chartData
+      const xData = []
+      for (let i = 1; i <= pageA.length; i++) {
+        xData.push('第' + i + '周')
+      }
       this.chart.setOption({
         tooltip: {
           trigger: 'axis',
           axisPointer: { // 坐标轴指示器，坐标轴触发有效
             type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
           }
+        },
+        legend: {
+          left: 'center',
+          bottom: '10',
+          data: ['报销申请', '出差申请', '请假申请']
         },
         grid: {
           top: 10,
@@ -62,7 +99,7 @@ export default {
         },
         xAxis: [{
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          data: xData,
           axisTick: {
             alignWithLabel: true
           }
@@ -74,25 +111,25 @@ export default {
           }
         }],
         series: [{
-          name: 'pageA',
+          name: '报销申请',
           type: 'bar',
-          stack: 'vistors',
+          stack: 'apply',
           barWidth: '60%',
-          data: [79, 52, 200, 334, 390, 330, 220],
+          data: pageA,
           animationDuration
         }, {
-          name: 'pageB',
+          name: '出差申请',
           type: 'bar',
-          stack: 'vistors',
+          stack: 'apply',
           barWidth: '60%',
-          data: [80, 52, 200, 334, 390, 330, 220],
+          data: pageB,
           animationDuration
         }, {
-          name: 'pageC',
+          name: '请假申请',
           type: 'bar',
-          stack: 'vistors',
+          stack: 'apply',
           barWidth: '60%',
-          data: [30, 52, 200, 334, 390, 330, 220],
+          data: pageC,
           animationDuration
         }]
       })

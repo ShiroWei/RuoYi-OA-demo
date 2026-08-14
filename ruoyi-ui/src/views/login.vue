@@ -1,7 +1,10 @@
 <template>
   <div class="login">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">{{title}}</h3>
+      <div class="login-header">
+        <img src="../assets/logo/logo.png" alt="" class="login-logo" />
+        <h3 class="title">{{title}}</h3>
+      </div>
       <el-form-item prop="username">
         <el-input
           v-model="loginForm.username"
@@ -49,9 +52,6 @@
           <span v-if="!loading">登 录</span>
           <span v-else>登 录 中...</span>
         </el-button>
-        <div style="float: right;" v-if="register">
-          <router-link class="link-type" :to="'/register'">立即注册</router-link>
-        </div>
       </el-form-item>
     </el-form>
     <!--  底部  -->
@@ -93,8 +93,6 @@ export default {
       loading: false,
       // 验证码开关
       captchaEnabled: true,
-      // 注册开关
-      register: false,
       redirect: undefined
     }
   },
@@ -170,15 +168,32 @@ export default {
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
-  color: #707070;
+  color: #333;
+  font-weight: 600;
+}
+.login-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  .login-logo {
+    width: 36px;
+    height: 36px;
+    margin-right: 12px;
+  }
+  .title {
+    margin: 0;
+    font-size: 20px;
+  }
 }
 
 .login-form {
-  border-radius: 6px;
+  border-radius: 8px;
   background: #ffffff;
   width: 400px;
-  padding: 25px 25px 5px 25px;
+  padding: 32px 32px 10px 32px;
   z-index: 1;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   .el-input {
     height: 38px;
     input {

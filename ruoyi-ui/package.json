@@ -1,8 +1,8 @@
 {
-  "name": "ruoyi",
+  "name": "oa-ui",
   "version": "3.6.8",
-  "description": "若依管理系统",
-  "author": "若依",
+  "description": "办公管理系统",
+  "author": "oa-demo",
   "license": "MIT",
   "scripts": {
     "dev": "vue-cli-service serve",
