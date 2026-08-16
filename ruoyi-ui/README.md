@@ -1,9 +1,10 @@
+# 办公管理系统前端
+
+基于 Vue 2 / Element UI 的前端工程，配合后端微服务使用。
+
 ## 开发
 
 ```bash
-# 克隆项目
-git clone https://gitee.com/y_project/RuoYi-Vue
-
 # 进入项目目录
 cd ruoyi-ui
 
