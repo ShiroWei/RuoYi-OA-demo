@@ -4,16 +4,12 @@
     <div class="welcome-banner">
       <div class="welcome-info">
         <div class="welcome-title">欢迎回来，{{ name }}</div>
-        <div class="welcome-sub">今天是 {{ today }}，愿你有一个高效的工作日</div>
+        <div class="welcome-sub">今天是 {{ today }}，开启高效协同办公的一天</div>
       </div>
       <div class="welcome-stats">
         <div class="stat-item">
           <div class="stat-num">{{ panel.todoCount }}</div>
           <div class="stat-label">待办事项</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num">{{ panel.msgCount }}</div>
-          <div class="stat-label">未读消息</div>
         </div>
         <div class="stat-item">
           <div class="stat-num">{{ panel.leaveCount }}</div>
@@ -23,9 +19,87 @@
           <div class="stat-num">{{ panel.finishCount }}</div>
           <div class="stat-label">本月完成</div>
         </div>
+        <div class="stat-item">
+          <div class="stat-num">{{ panel.todayOnline }}</div>
+          <div class="stat-label">在线同事</div>
+        </div>
       </div>
     </div>
 
+    <!-- 快捷入口 -->
+    <el-row :gutter="16" class="quick-entry-row">
+      <el-col :xs="12" :sm="6">
+        <div class="quick-entry" @click="handleGo('/oa/approval/apply')">
+          <div class="quick-icon icon-apply"><svg-icon icon-class="form" /></div>
+          <div class="quick-text">发起申请</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="quick-entry" @click="handleGo('/oa/todo')">
+          <div class="quick-icon icon-todo-entry"><svg-icon icon-class="message" /></div>
+          <div class="quick-text">我的待办</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="quick-entry" @click="handleGo('/oa/calendar')">
+          <div class="quick-icon icon-calendar"><svg-icon icon-class="date" /></div>
+          <div class="quick-text">会议日程</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="quick-entry" @click="handleGo('/oa/contacts')">
+          <div class="quick-icon icon-contacts"><svg-icon icon-class="people" /></div>
+          <div class="quick-text">通讯录</div>
+        </div>
+      </el-col>
+    </el-row>
+
+    <!-- 今日待办 + 日程公告 -->
+    <el-row :gutter="16" class="workspace-row">
+      <el-col :span="14">
+        <el-card shadow="never" class="workspace-card">
+          <div slot="header" class="card-header">
+            <span>今日待办</span>
+            <el-button type="text" @click="handleGo('/oa/todo')">查看全部</el-button>
+          </div>
+          <div v-loading="todoLoading">
+            <div v-for="item in todoList" :key="item.id" class="todo-item" @click="handleGo('/oa/approval/detail/' + item.id)">
+              <el-tag size="mini" :type="priorityType(item.priority)">{{ item.priority }}</el-tag>
+              <span class="todo-title">{{ item.title }}</span>
+              <span class="todo-time">{{ item.createTime }}</span>
+            </div>
+            <el-empty v-if="!todoLoading && todoList.length === 0" description="暂无待办事项" :image-size="70" />
+          </div>
+        </el-card>
+      </el-col>
+
+      <el-col :span="10">
+        <el-card shadow="never" class="workspace-card">
+          <div slot="header" class="card-header">
+            <span>今日日程</span>
+            <el-button type="text" @click="handleGo('/oa/calendar')">更多</el-button>
+          </div>
+          <div v-for="ev in dayEvents" :key="ev.id" class="schedule-item">
+            <div class="schedule-time">{{ ev.time }}</div>
+            <div class="schedule-title">{{ ev.title }}</div>
+          </div>
+          <el-empty v-if="dayEvents.length === 0" description="今日暂无日程" :image-size="70" />
+        </el-card>
+
+        <el-card shadow="never" class="workspace-card notice-card">
+          <div slot="header" class="card-header">
+            <span>最新公告</span>
+          </div>
+          <div v-for="n in notices" :key="n.noticeId" class="notice-item">
+            <span class="notice-title">{{ n.noticeTitle }}</span>
+            <span class="notice-time">{{ n.createTime }}</span>
+          </div>
+          <el-empty v-if="notices.length === 0" description="暂无公告" :image-size="70" />
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 统计卡片 -->
     <el-row :gutter="32" class="panel-group">
       <el-col :xs="12" :sm="12" :lg="6">
         <div class="card-panel" @click="handleSetLineChartData('todo')">
@@ -108,6 +182,9 @@ import RaddarChart from './RaddarChart'
 import PieChart from './PieChart'
 import BarChart from './BarChart'
 import { getPanelData, getLineChartData, getBarChartData, getPieChartData, getRaddarChartData } from '@/api/dashboard'
+import { listTodo } from '@/api/todo'
+import { listCalendarEvent } from '@/api/calendar'
+import { listNoticeTop } from '@/api/system/notice'
 
 const defaultLineData = {
   todo: {
@@ -149,6 +226,10 @@ export default {
         todayOnline: 0,
         weekLeave: 0
       },
+      todoList: [],
+      todoLoading: false,
+      dayEvents: [],
+      notices: [],
       lineChartData: defaultLineData.todo,
       barChartData: {},
       pieChartData: {},
@@ -158,6 +239,9 @@ export default {
   created() {
     this.today = this.formatToday()
     this.loadData()
+    this.loadTodo()
+    this.loadSchedule()
+    this.loadNotice()
     this.name = this.$store.state.user.name || '管理员'
   },
   methods: {
@@ -184,6 +268,39 @@ export default {
       getRaddarChartData().then(res => {
         this.raddarChartData = res
       })
+    },
+    loadTodo() {
+      this.todoLoading = true
+      listTodo('pending').then(res => {
+        this.todoList = (res || []).slice(0, 4)
+        this.todoLoading = false
+      })
+    },
+    loadSchedule() {
+      listCalendarEvent('').then(res => {
+        const d = this.formatKey(new Date())
+        this.dayEvents = (res || []).filter(ev => ev.date === d)
+      })
+    },
+    loadNotice() {
+      listNoticeTop().then(res => {
+        const list = res.data || []
+        this.notices = Array.isArray(list) ? list.slice(0, 3) : []
+      })
+    },
+    formatKey(date) {
+      const y = date.getFullYear()
+      const m = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return y + '-' + m + '-' + day
+    },
+    priorityType(priority) {
+      if (priority === '高') return 'danger'
+      if (priority === '中') return 'warning'
+      return 'info'
+    },
+    handleGo(path) {
+      this.$router.push(path)
     },
     handleSetLineChartData(type) {
       this.lineChartData = defaultLineData[type]
@@ -234,6 +351,142 @@ export default {
           font-size: 13px;
           opacity: 0.9;
         }
+      }
+    }
+  }
+
+  .quick-entry-row {
+    margin-top: 16px;
+
+    .quick-entry {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 8px;
+      padding: 18px 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.2s;
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(24, 144, 255, 0.18);
+      }
+
+      .quick-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: #fff;
+        margin-right: 12px;
+
+        &.icon-apply { background: linear-gradient(135deg, #1890ff, #36a3f7); }
+        &.icon-todo-entry { background: linear-gradient(135deg, #13ce66, #36d67e); }
+        &.icon-calendar { background: linear-gradient(135deg, #ffba00, #ffcf3d); }
+        &.icon-contacts { background: linear-gradient(135deg, #722ed1, #9254de); }
+      }
+
+      .quick-text {
+        font-weight: 600;
+        color: #333;
+      }
+    }
+  }
+
+  .workspace-row {
+    margin-top: 16px;
+
+    .workspace-card {
+      border: none;
+      margin-bottom: 16px;
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+      }
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed #ebeef5;
+      cursor: pointer;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        .todo-title {
+          color: #1890ff;
+        }
+      }
+
+      .todo-title {
+        margin: 0 12px;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .todo-time {
+        color: #909399;
+        font-size: 12px;
+      }
+    }
+
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #ebeef5;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .schedule-time {
+        width: 72px;
+        color: #1890ff;
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .schedule-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .notice-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #ebeef5;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .notice-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .notice-time {
+        color: #909399;
+        font-size: 12px;
       }
     }
   }
