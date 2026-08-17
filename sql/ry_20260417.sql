@@ -161,10 +161,15 @@ create table sys_menu (
 -- 初始化-菜单信息表数据
 -- ----------------------------
 -- 一级菜单
+insert into sys_menu values('2000', '办公应用', '0', '0', 'oa',             null, '', '', 1, 0, 'M', '0', '0', '', 'component', 'admin', sysdate(), '', null, '办公应用目录');
 insert into sys_menu values('1', '系统管理', '0', '1', 'system',           null, '', '', 1, 0, 'M', '0', '0', '', 'system',   'admin', sysdate(), '', null, '系统管理目录');
 insert into sys_menu values('2', '系统监控', '0', '2', 'monitor',          null, '', '', 1, 0, 'M', '0', '0', '', 'monitor',  'admin', sysdate(), '', null, '系统监控目录');
 insert into sys_menu values('3', '系统工具', '0', '3', 'tool',             null, '', '', 1, 0, 'M', '0', '0', '', 'tool',     'admin', sysdate(), '', null, '系统工具目录');
 -- 二级菜单
+insert into sys_menu values('2001', '待办中心', '2000', '1', 'todo',       'oa/todo/index',                        '', '', 1, 0, 'C', '0', '0', 'oa:todo:list',           'list',          'admin', sysdate(), '', null, '待办中心菜单');
+insert into sys_menu values('2002', '审批中心', '2000', '2', 'approval',   'oa/approval/index',                    '', '', 1, 0, 'C', '0', '0', 'oa:approval:list',       'form',          'admin', sysdate(), '', null, '审批中心菜单');
+insert into sys_menu values('2003', '会议日程', '2000', '3', 'calendar',   'oa/calendar/index',                    '', '', 1, 0, 'C', '0', '0', 'oa:calendar:list',       'date',          'admin', sysdate(), '', null, '会议日程菜单');
+insert into sys_menu values('2004', '通讯录',   '2000', '4', 'contacts',   'oa/contacts/index',                    '', '', 1, 0, 'C', '0', '0', 'oa:contacts:list',       'people',        'admin', sysdate(), '', null, '通讯录菜单');
 insert into sys_menu values('100',  '用户管理',       '1',   '1', 'user',       'system/user/index',                 '', '', 1, 0, 'C', '0', '0', 'system:user:list',        'user',          'admin', sysdate(), '', null, '用户管理菜单');
 insert into sys_menu values('101',  '角色管理',       '1',   '2', 'role',       'system/role/index',                 '', '', 1, 0, 'C', '0', '0', 'system:role:list',        'peoples',       'admin', sysdate(), '', null, '角色管理菜单');
 insert into sys_menu values('102',  '菜单管理',       '1',   '3', 'menu',       'system/menu/index',                 '', '', 1, 0, 'C', '0', '0', 'system:menu:list',        'tree-table',    'admin', sysdate(), '', null, '菜单管理菜单');
@@ -374,6 +379,11 @@ insert into sys_role_menu values ('2', '1057');
 insert into sys_role_menu values ('2', '1058');
 insert into sys_role_menu values ('2', '1059');
 insert into sys_role_menu values ('2', '1060');
+insert into sys_role_menu values ('2', '2000');
+insert into sys_role_menu values ('2', '2001');
+insert into sys_role_menu values ('2', '2002');
+insert into sys_role_menu values ('2', '2003');
+insert into sys_role_menu values ('2', '2004');
 
 -- ----------------------------
 -- 8、角色和部门关联表  角色1-N部门
