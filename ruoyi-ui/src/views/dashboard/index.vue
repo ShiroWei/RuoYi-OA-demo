@@ -81,7 +81,7 @@
     <el-row :gutter="32">
       <el-col :xs="24" :sm="24" :lg="8">
         <div class="chart-wrapper">
-          <div class="chart-title">办公效率评估</div>
+          <div class="chart-title">协同办公效率评估</div>
           <raddar-chart :chart-data="raddarChartData" />
         </div>
       </el-col>

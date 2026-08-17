@@ -1,7 +1,7 @@
 {
   "name": "oa-ui",
   "version": "3.6.8",
-  "description": "办公管理系统",
+  "description": "OA协同办公平台",
   "author": "oa-demo",
   "license": "MIT",
   "scripts": {

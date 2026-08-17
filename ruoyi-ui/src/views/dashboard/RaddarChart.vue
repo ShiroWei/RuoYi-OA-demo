@@ -106,7 +106,7 @@ export default {
         legend: {
           left: 'center',
           bottom: '10',
-          data: ['办公效率']
+          data: ['协同办公']
         },
         series: [{
           type: 'radar',
@@ -123,7 +123,7 @@ export default {
           data: [
             {
               value: series,
-              name: '办公效率'
+              name: '协同办公'
             }
           ],
           animationDuration

@@ -62,5 +62,5 @@ module.exports = {
   /**
    * 底部版权文本内容
    */
-  footerContent: 'Copyright © 2026 OA Demo. All Rights Reserved.'
+  footerContent: 'Copyright © 2026 OA协同办公平台. All Rights Reserved.'
 }
