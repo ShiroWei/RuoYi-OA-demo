@@ -74,22 +74,26 @@
     </el-row>
 
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+      <div class="chart-title">近 7 日工作动态趋势</div>
       <line-chart :chart-data="lineChartData" />
     </el-row>
 
     <el-row :gutter="32">
       <el-col :xs="24" :sm="24" :lg="8">
         <div class="chart-wrapper">
+          <div class="chart-title">办公效率评估</div>
           <raddar-chart :chart-data="raddarChartData" />
         </div>
       </el-col>
       <el-col :xs="24" :sm="24" :lg="8">
         <div class="chart-wrapper">
+          <div class="chart-title">审批类型分布</div>
           <pie-chart :chart-data="pieChartData" />
         </div>
       </el-col>
       <el-col :xs="24" :sm="24" :lg="8">
         <div class="chart-wrapper">
+          <div class="chart-title">各部门申请量</div>
           <bar-chart :chart-data="barChartData" />
         </div>
       </el-col>
@@ -107,20 +111,20 @@ import { getPanelData, getLineChartData, getBarChartData, getPieChartData, getRa
 
 const defaultLineData = {
   todo: {
-    expectedData: [12, 15, 9, 18, 10, 6, 12],
-    actualData: [8, 12, 6, 15, 9, 5, 12]
+    expectedData: [100, 115, 109, 128, 110, 106, 112],
+    actualData: [88, 102, 96, 115, 99, 95, 112]
   },
   msg: {
-    expectedData: [20, 18, 25, 16, 22, 28, 8],
-    actualData: [15, 12, 18, 10, 16, 20, 8]
+    expectedData: [120, 118, 125, 116, 122, 128, 108],
+    actualData: [105, 102, 108, 100, 106, 110, 108]
   },
   leave: {
-    expectedData: [3, 5, 4, 2, 6, 3, 3],
-    actualData: [2, 4, 3, 1, 5, 2, 3]
+    expectedData: [83, 95, 84, 72, 96, 83, 73],
+    actualData: [72, 84, 73, 61, 85, 72, 73]
   },
   finish: {
-    expectedData: [40, 52, 45, 61, 49, 58, 56],
-    actualData: [35, 45, 40, 52, 43, 50, 56]
+    expectedData: [140, 152, 145, 161, 149, 158, 156],
+    actualData: [125, 135, 130, 142, 133, 140, 156]
   }
 }
 
@@ -323,6 +327,13 @@ export default {
     background: #fff;
     padding: 16px 16px 0;
     margin-bottom: 32px;
+  }
+
+  .chart-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
   }
 }
 
