@@ -11,15 +11,15 @@
       <el-tabs v-model="activeType" @tab-click="handleLoad">
         <el-tab-pane label="待我审批" name="todo">
           <el-table :data="list" v-loading="loading" border stripe>
-            <el-table-column label="单号" prop="id" width="160" align="center" />
+            <el-table-column label="单号" prop="applyNo" width="170" align="center" />
             <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip>
               <template slot-scope="scope">
-                <a class="link-type" @click="handleDetail(scope.row.id)">{{ scope.row.title }}</a>
+                <a class="link-type" @click="handleDetail(scope.row.applyId)">{{ scope.row.title }}</a>
               </template>
             </el-table-column>
-            <el-table-column label="类型" prop="type" width="90" align="center">
+            <el-table-column label="类型" prop="applyType" width="90" align="center">
               <template slot-scope="scope">
-                <el-tag size="mini">{{ scope.row.type }}</el-tag>
+                <el-tag size="mini">{{ scope.row.applyType }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="申请人" prop="applicant" width="100" align="center" />
@@ -30,24 +30,25 @@
                 <span v-else-if="scope.row.amount">¥ {{ scope.row.amount }}</span>
               </template>
             </el-table-column>
+            <el-table-column label="当前环节" prop="currentNode" width="120" align="center" />
             <el-table-column label="操作" width="160" align="center">
               <template slot-scope="scope">
-                <el-button type="primary" size="mini" @click="handleDetail(scope.row.id)">审批</el-button>
+                <el-button type="primary" size="mini" @click="handleDetail(scope.row.applyId)">审批</el-button>
               </template>
             </el-table-column>
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="我已审批" name="done">
           <el-table :data="list" v-loading="loading" border stripe>
-            <el-table-column label="单号" prop="id" width="160" align="center" />
+            <el-table-column label="单号" prop="applyNo" width="170" align="center" />
             <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip>
               <template slot-scope="scope">
-                <a class="link-type" @click="handleDetail(scope.row.id)">{{ scope.row.title }}</a>
+                <a class="link-type" @click="handleDetail(scope.row.applyId)">{{ scope.row.title }}</a>
               </template>
             </el-table-column>
-            <el-table-column label="类型" prop="type" width="90" align="center">
+            <el-table-column label="类型" prop="applyType" width="90" align="center">
               <template slot-scope="scope">
-                <el-tag size="mini">{{ scope.row.type }}</el-tag>
+                <el-tag size="mini">{{ scope.row.applyType }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="申请人" prop="applicant" width="100" align="center" />
@@ -58,9 +59,9 @@
                 <span v-else-if="scope.row.amount">¥ {{ scope.row.amount }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="结果" prop="status" width="90" align="center">
+            <el-table-column label="结果" width="90" align="center">
               <template slot-scope="scope">
-                <el-tag size="mini" :type="scope.row.status === '已通过' ? 'success' : 'danger'">{{ scope.row.status }}</el-tag>
+                <el-tag size="mini" :type="scope.row.status === '1' ? 'success' : 'danger'">{{ scope.row.status === '1' ? '已通过' : '已驳回' }}</el-tag>
               </template>
             </el-table-column>
           </el-table>
@@ -89,7 +90,7 @@ export default {
     loadList() {
       this.loading = true
       listApproval(this.activeType).then(res => {
-        this.list = res
+        this.list = res.rows
         this.loading = false
       })
     },

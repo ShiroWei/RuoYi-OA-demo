@@ -10,16 +10,17 @@
         <!-- 左侧：单据信息 -->
         <el-col :span="14">
           <el-descriptions title="单据信息" :column="2" border>
-            <el-descriptions-item label="单号">{{ detail.id }}</el-descriptions-item>
+            <el-descriptions-item label="单号">{{ detail.applyNo }}</el-descriptions-item>
             <el-descriptions-item label="类型">
-              <el-tag size="small">{{ detail.type }}</el-tag>
+              <el-tag size="small">{{ detail.applyType }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="申请人">{{ detail.applicant }}</el-descriptions-item>
-            <el-descriptions-item label="所属部门">{{ detail.dept }}</el-descriptions-item>
+            <el-descriptions-item label="所属部门">{{ detail.deptName }}</el-descriptions-item>
             <el-descriptions-item label="申请时间">{{ detail.applyTime }}</el-descriptions-item>
             <el-descriptions-item label="当前状态">
-              <el-tag size="small" type="warning">{{ detail.status }}</el-tag>
+              <el-tag size="small" :type="detail.status === '1' ? 'success' : (detail.status === '2' ? 'danger' : 'warning')">{{ statusText(detail.status) }}</el-tag>
             </el-descriptions-item>
+            <el-descriptions-item label="当前环节">{{ detail.currentNode }}</el-descriptions-item>
             <el-descriptions-item label="开始日期" v-if="detail.startDate">{{ detail.startDate }}</el-descriptions-item>
             <el-descriptions-item label="结束日期" v-if="detail.endDate">{{ detail.endDate }}</el-descriptions-item>
             <el-descriptions-item label="请假天数" v-if="detail.days">{{ detail.days }} 天</el-descriptions-item>
@@ -27,11 +28,11 @@
 
           <div class="reason-block">
             <div class="reason-title">申请事由</div>
-            <div class="reason-content">{{ detail.reason }}</div>
+            <div class="reason-content">{{ detail.content }}</div>
           </div>
 
           <!-- 审批操作 -->
-          <div class="action-bar" v-if="detail.status === '待审批'">
+          <div class="action-bar" v-if="detail.status === '0'">
             <el-button type="success" icon="el-icon-check" @click="handlePass">通过</el-button>
             <el-button type="danger" icon="el-icon-close" @click="handleReject">驳回</el-button>
           </div>
@@ -44,8 +45,8 @@
             <el-step
               v-for="(item, index) in flow"
               :key="index"
-              :title="item.name"
-              :description="item.description + (item.user ? '（' + item.user + '）' : '') + (item.time ? ' ' + item.time : '')"
+              :title="item.nodeName"
+              :description="item.comment + (item.handler ? '（' + item.handler + '）' : '') + (item.handleTime ? ' ' + item.handleTime : '')"
             />
           </el-steps>
         </el-col>
@@ -55,7 +56,7 @@
 </template>
 
 <script>
-import { getApprovalDetail, getApprovalFlow } from '@/api/approval'
+import { getApprovalDetail, getApprovalFlow, approveApply, rejectApply } from '@/api/approval'
 
 export default {
   name: 'ApprovalDetail',
@@ -63,32 +64,56 @@ export default {
     return {
       detail: {},
       flow: [],
-      activeStep: 1
+      activeStep: 1,
+      applyId: null
     }
   },
   created() {
-    const id = this.$route.params.id || 'A20260816001'
-    this.loadDetail(id)
+    this.applyId = this.$route.params.id
+    this.loadDetail()
     this.loadFlow()
   },
   methods: {
-    loadDetail(id) {
-      getApprovalDetail(id).then(res => {
+    statusText(status) {
+      return status === '1' ? '已通过' : (status === '2' ? '已驳回' : '待审批')
+    },
+    loadDetail() {
+      getApprovalDetail(this.applyId).then(res => {
         this.detail = res
       })
     },
     loadFlow() {
-      getApprovalFlow().then(res => {
+      getApprovalFlow(this.applyId).then(res => {
         this.flow = res
         const processIdx = res.findIndex(item => item.status === 'process')
-        this.activeStep = processIdx >= 0 ? processIdx : 1
+        this.activeStep = processIdx >= 0 ? processIdx : res.length - 1
       })
     },
     handlePass() {
-      this.$modal.msgSuccess('已通过，流程进入下一节点')
+      this.$prompt('请输入审批意见', '审批通过', {
+        confirmButtonText: '确认通过',
+        cancelButtonText: '取消',
+        inputPlaceholder: '审批意见（可为空）'
+      }).then(({ value }) => {
+        approveApply(this.applyId, value || '同意').then(() => {
+          this.$modal.msgSuccess('审批通过，流程进入下一节点')
+          this.loadDetail()
+          this.loadFlow()
+        })
+      }).catch(() => {})
     },
     handleReject() {
-      this.$modal.msgSuccess('已驳回，流程已退回发起人')
+      this.$prompt('请输入驳回原因', '审批驳回', {
+        confirmButtonText: '确认驳回',
+        cancelButtonText: '取消',
+        inputPlaceholder: '驳回原因'
+      }).then(({ value }) => {
+        rejectApply(this.applyId, value || '不同意').then(() => {
+          this.$modal.msgSuccess('已驳回，流程已退回发起人')
+          this.loadDetail()
+          this.loadFlow()
+        })
+      }).catch(() => {})
     }
   }
 }

@@ -33,21 +33,25 @@
       <el-tabs v-model="activeType" @tab-click="handleLoad">
         <el-tab-pane label="待我审批" name="pending">
           <el-table :data="list" v-loading="loading" border stripe>
-            <el-table-column label="单号" prop="id" width="160" align="center" />
+            <el-table-column label="单号" prop="bizId" width="100" align="center" />
             <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip />
-            <el-table-column label="类型" prop="type" width="90" align="center">
+            <el-table-column label="类型" prop="todoType" width="90" align="center">
               <template slot-scope="scope">
-                <el-tag size="mini">{{ scope.row.type }}</el-tag>
+                <el-tag size="mini">{{ scope.row.todoType }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="发起人" prop="applicant" width="100" align="center" />
-            <el-table-column label="发起时间" prop="createTime" width="160" align="center" />
+            <el-table-column label="发起人" prop="submitter" width="100" align="center" />
+            <el-table-column label="发起时间" prop="submitTime" width="160" align="center" />
             <el-table-column label="优先级" prop="priority" width="90" align="center">
               <template slot-scope="scope">
                 <el-tag size="mini" :type="scope.row.priority === '高' ? 'danger' : (scope.row.priority === '中' ? 'warning' : 'info')">{{ scope.row.priority }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="状态" prop="status" width="90" align="center" />
+            <el-table-column label="状态" width="90" align="center">
+              <template slot-scope="scope">
+                <el-tag size="mini" type="warning">待审批</el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="140" align="center">
               <template slot-scope="scope">
                 <el-button type="primary" size="mini" @click="handleGo(scope.row)">去审批</el-button>
@@ -57,33 +61,37 @@
         </el-tab-pane>
         <el-tab-pane label="我已处理" name="done">
           <el-table :data="list" v-loading="loading" border stripe>
-            <el-table-column label="单号" prop="id" width="160" align="center" />
+            <el-table-column label="单号" prop="bizId" width="100" align="center" />
             <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip />
-            <el-table-column label="类型" prop="type" width="90" align="center">
+            <el-table-column label="类型" prop="todoType" width="90" align="center">
               <template slot-scope="scope">
-                <el-tag size="mini">{{ scope.row.type }}</el-tag>
+                <el-tag size="mini">{{ scope.row.todoType }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="发起人" prop="applicant" width="100" align="center" />
-            <el-table-column label="发起时间" prop="createTime" width="160" align="center" />
-            <el-table-column label="结果" prop="status" width="90" align="center">
+            <el-table-column label="发起人" prop="submitter" width="100" align="center" />
+            <el-table-column label="发起时间" prop="submitTime" width="160" align="center" />
+            <el-table-column label="结果" width="90" align="center">
               <template slot-scope="scope">
-                <el-tag size="mini" :type="scope.row.status === '已通过' ? 'success' : 'danger'">{{ scope.row.status }}</el-tag>
+                <el-tag size="mini" type="success">已处理</el-tag>
               </template>
             </el-table-column>
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="我发起的" name="apply">
           <el-table :data="list" v-loading="loading" border stripe>
-            <el-table-column label="单号" prop="id" width="160" align="center" />
+            <el-table-column label="单号" prop="bizId" width="100" align="center" />
             <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip />
-            <el-table-column label="类型" prop="type" width="90" align="center">
+            <el-table-column label="类型" prop="todoType" width="90" align="center">
               <template slot-scope="scope">
-                <el-tag size="mini">{{ scope.row.type }}</el-tag>
+                <el-tag size="mini">{{ scope.row.todoType }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="发起时间" prop="createTime" width="160" align="center" />
-            <el-table-column label="状态" prop="status" width="90" align="center" />
+            <el-table-column label="发起时间" prop="submitTime" width="160" align="center" />
+            <el-table-column label="状态" width="90" align="center">
+              <template slot-scope="scope">
+                <el-tag size="mini" :type="scope.row.status === '1' ? 'success' : 'warning'">{{ scope.row.status === '1' ? '已处理' : '审批中' }}</el-tag>
+              </template>
+            </el-table-column>
           </el-table>
         </el-tab-pane>
       </el-tabs>
@@ -117,7 +125,7 @@ export default {
     loadList() {
       this.loading = true
       listTodo(this.activeType).then(res => {
-        this.list = res
+        this.list = res.rows
         this.loading = false
       })
     },
@@ -125,7 +133,7 @@ export default {
       this.loadList()
     },
     handleGo(row) {
-      this.$router.push({ path: '/oa/approval/detail/' + row.id })
+      this.$router.push({ path: '/oa/approval/detail/' + row.bizId })
     }
   }
 }
