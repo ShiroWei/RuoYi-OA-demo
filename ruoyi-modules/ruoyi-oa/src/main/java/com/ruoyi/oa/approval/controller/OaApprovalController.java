@@ -69,10 +69,7 @@ public class OaApprovalController extends BaseController
         apply.setApplicantId(SecurityUtils.getUserId());
         apply.setApplicant(SecurityUtils.getUsername());
         approvalService.insertApproval(apply);
-        AjaxResult result = success();
-        result.put("id", apply.getApplyId());
-        result.put("applyNo", apply.getApplyNo());
-        return result;
+        return success(apply);
     }
 
     /**

@@ -128,11 +128,11 @@ public class OaApprovalServiceImpl implements IOaApprovalService
                 break;
             }
         }
-        // 下一待处理节点标记为处理中
+        // 下一业务处理节点标记为处理中（审批完成为终结节点，不参与流转）
         boolean hasNext = false;
         for (OaApprovalFlow flow : flows)
         {
-            if ("wait".equals(flow.getStatus()))
+            if ("wait".equals(flow.getStatus()) && !"审批完成".equals(flow.getNodeName()))
             {
                 flow.setStatus("process");
                 approvalFlowMapper.updateOaApprovalFlow(flow);
@@ -143,6 +143,15 @@ public class OaApprovalServiceImpl implements IOaApprovalService
         }
         if (!hasNext)
         {
+            // 所有业务节点已完成，终结流程
+            for (OaApprovalFlow flow : flows)
+            {
+                if ("审批完成".equals(flow.getNodeName()) && !"finish".equals(flow.getStatus()))
+                {
+                    flow.setStatus("finish");
+                    approvalFlowMapper.updateOaApprovalFlow(flow);
+                }
+            }
             apply.setStatus("1");
             apply.setCurrentNode("审批完成");
         }
