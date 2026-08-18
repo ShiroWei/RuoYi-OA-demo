@@ -8,8 +8,8 @@
             <template slot="dateCell" slot-scope="{ date, data }">
               <div class="calendar-cell" :class="{ 'is-selected': isSelected(date) }">
                 <div class="cell-date">{{ data.day.split('-')[2] }}</div>
-                <div v-for="ev in eventsOfDay(date)" :key="ev.id" class="cell-event" :title="ev.title">
-                  {{ ev.time.split('-')[0] }} {{ ev.title }}
+                <div v-for="ev in eventsOfDay(date)" :key="ev.eventId" class="cell-event" :title="ev.title">
+                  {{ ev.startTime }} {{ ev.title }}
                 </div>
               </div>
             </template>
@@ -24,12 +24,12 @@
             <span>{{ formattedDate }} 日程</span>
           </div>
           <div v-loading="loading">
-            <div v-for="ev in dayEvents" :key="ev.id" class="event-item">
-              <div class="event-time">{{ ev.time }}</div>
+            <div v-for="ev in dayEvents" :key="ev.eventId" class="event-item">
+              <div class="event-time">{{ ev.startTime + '-' + ev.endTime }}</div>
               <div class="event-body">
                 <div class="event-title">{{ ev.title }}</div>
                 <div class="event-meta">
-                  <el-tag size="mini">{{ ev.type }}</el-tag>
+                  <el-tag size="mini">{{ ev.eventType }}</el-tag>
                   <span class="event-location">{{ ev.location }}</span>
                 </div>
               </div>
@@ -82,10 +82,10 @@ export default {
     loadDayEvents() {
       const d = this.currentDate
       const key = this.formatKey(d)
-      this.dayEvents = this._events.filter(ev => ev.date === key)
+      this.dayEvents = this._events.filter(ev => ev.eventDate === key)
     },
     eventsOfDay(date) {
-      return this._events.filter(ev => ev.date === this.formatKey(date))
+      return this._events.filter(ev => ev.eventDate === this.formatKey(date))
     },
     isSelected(date) {
       return this.formatKey(date) === this.formatKey(this.currentDate)

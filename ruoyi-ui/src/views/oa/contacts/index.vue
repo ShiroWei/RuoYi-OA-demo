@@ -29,7 +29,7 @@
             <span>{{ currentDept }}（{{ contacts.length }} 人）</span>
           </div>
           <el-row :gutter="16" v-loading="loading">
-            <el-col :xs="12" :sm="8" :lg="8" v-for="person in contacts" :key="person.id">
+            <el-col :xs="12" :sm="8" :lg="8" v-for="person in contacts" :key="person.personId">
               <div class="contact-item">
                 <el-avatar :size="44" class="contact-avatar">{{ person.name.charAt(0) }}</el-avatar>
                 <div class="contact-info">
@@ -84,9 +84,6 @@ export default {
           }))
         }
         this.deptTree = build(res.data || res)
-        if (this.deptTree.length) {
-          this.currentDept = this.deptTree[0].label
-        }
       }).catch(() => {
         // 接口异常时给出演示结构
         this.deptTree = [
@@ -101,8 +98,12 @@ export default {
     },
     loadContacts() {
       this.loading = true
-      listContacts().then(res => {
-        this.contacts = res
+      const query = {}
+      if (this.currentDept && this.currentDept !== '全部成员') {
+        query.deptName = this.currentDept
+      }
+      listContacts(query).then(res => {
+        this.contacts = res.rows || res
         this.loading = false
       })
     },

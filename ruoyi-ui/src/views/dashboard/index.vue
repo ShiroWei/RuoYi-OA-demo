@@ -63,10 +63,10 @@
             <el-button type="text" @click="handleGo('/oa/todo')">查看全部</el-button>
           </div>
           <div v-loading="todoLoading">
-            <div v-for="item in todoList" :key="item.id" class="todo-item" @click="handleGo('/oa/approval/detail/' + item.id)">
+            <div v-for="item in todoList" :key="item.todoId" class="todo-item" @click="handleGo('/oa/approval/detail/' + item.bizId)">
               <el-tag size="mini" :type="priorityType(item.priority)">{{ item.priority }}</el-tag>
               <span class="todo-title">{{ item.title }}</span>
-              <span class="todo-time">{{ item.createTime }}</span>
+              <span class="todo-time">{{ item.submitTime }}</span>
             </div>
             <el-empty v-if="!todoLoading && todoList.length === 0" description="暂无待办事项" :image-size="70" />
           </div>
@@ -79,8 +79,8 @@
             <span>今日日程</span>
             <el-button type="text" @click="handleGo('/oa/calendar')">更多</el-button>
           </div>
-          <div v-for="ev in dayEvents" :key="ev.id" class="schedule-item">
-            <div class="schedule-time">{{ ev.time }}</div>
+          <div v-for="ev in dayEvents" :key="ev.eventId" class="schedule-item">
+            <div class="schedule-time">{{ ev.startTime }}</div>
             <div class="schedule-title">{{ ev.title }}</div>
           </div>
           <el-empty v-if="dayEvents.length === 0" description="今日暂无日程" :image-size="70" />
@@ -272,14 +272,14 @@ export default {
     loadTodo() {
       this.todoLoading = true
       listTodo('pending').then(res => {
-        this.todoList = (res || []).slice(0, 4)
+        this.todoList = (res.rows || []).slice(0, 4)
         this.todoLoading = false
       })
     },
     loadSchedule() {
       listCalendarEvent('').then(res => {
         const d = this.formatKey(new Date())
-        this.dayEvents = (res || []).filter(ev => ev.date === d)
+        this.dayEvents = (res || []).filter(ev => ev.eventDate === d)
       })
     },
     loadNotice() {
