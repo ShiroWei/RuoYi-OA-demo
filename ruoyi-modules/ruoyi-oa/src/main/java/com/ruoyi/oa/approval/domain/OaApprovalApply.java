@@ -54,6 +54,9 @@ public class OaApprovalApply extends BaseEntity
     /** 状态（0待审批 1已通过 2已驳回） */
     private String status;
 
+    /** 状态集合（多状态查询） */
+    private String[] statuses;
+
     /** 当前环节 */
     private String currentNode;
 
@@ -189,6 +192,16 @@ public class OaApprovalApply extends BaseEntity
     public void setStatus(String status)
     {
         this.status = status;
+    }
+
+    public String[] getStatuses()
+    {
+        return statuses;
+    }
+
+    public void setStatuses(String[] statuses)
+    {
+        this.statuses = statuses;
     }
 
     public String getCurrentNode()

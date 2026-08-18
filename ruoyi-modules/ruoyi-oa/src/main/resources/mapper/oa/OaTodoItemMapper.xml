@@ -28,7 +28,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectOaTodoItemVo"/>
         <where>
             <if test="title != null and title != ''"> and title like concat('%', #{title}, '%')</if>
+            <if test="bizType != null and bizType != ''"> and biz_type = #{bizType}</if>
+            <if test="bizId != null"> and biz_id = #{bizId}</if>
             <if test="todoType != null and todoType != ''"> and todo_type = #{todoType}</if>
+            <if test="submitter != null and submitter != ''"> and submitter = #{submitter}</if>
             <if test="handlerId != null"> and handler_id = #{handlerId}</if>
             <if test="priority != null and priority != ''"> and priority = #{priority}</if>
             <if test="status != null and status != ''"> and status = #{status}</if>

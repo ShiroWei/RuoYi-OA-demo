@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.oa.todo.domain.OaTodoItem;
 import com.ruoyi.oa.todo.mapper.OaTodoItemMapper;
 import com.ruoyi.oa.todo.service.IOaTodoService;
@@ -37,8 +38,8 @@ public class OaTodoServiceImpl implements IOaTodoService
         stat.put("doneCount", todoItemMapper.selectOaTodoItemList(done).size());
 
         OaTodoItem apply = new OaTodoItem();
-        apply.setSubmitter(null);
-        stat.put("applyCount", 0);
+        apply.setSubmitter(SecurityUtils.getUsername());
+        stat.put("applyCount", todoItemMapper.selectOaTodoItemList(apply).size());
         stat.put("overdueCount", 0);
         return stat;
     }
@@ -54,13 +55,13 @@ public class OaTodoServiceImpl implements IOaTodoService
         {
             query.setStatus("1");
         }
+        else if ("apply".equals(type))
+        {
+            query.setSubmitter(SecurityUtils.getUsername());
+        }
         else
         {
             query.setStatus("0");
-        }
-        if ("apply".equals(type))
-        {
-            query.setHandlerId(userId);
         }
         return todoItemMapper.selectOaTodoItemList(query);
     }

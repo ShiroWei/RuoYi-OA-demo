@@ -39,6 +39,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyType != null and applyType != ''"> and apply_type = #{applyType}</if>
             <if test="applicantId != null"> and applicant_id = #{applicantId}</if>
             <if test="status != null and status != ''"> and status = #{status}</if>
+            <if test="statuses != null and statuses.length > 0">
+                and status in
+                <foreach item="s" collection="statuses" open="(" separator="," close=")">
+                    #{s}
+                </foreach>
+            </if>
         </where>
         order by apply_time desc
     </select>
