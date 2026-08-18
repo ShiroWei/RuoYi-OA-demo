@@ -79,14 +79,14 @@ export default {
     },
     loadDetail() {
       getApprovalDetail(this.applyId).then(res => {
-        this.detail = res
+        this.detail = res.data
       })
     },
     loadFlow() {
       getApprovalFlow(this.applyId).then(res => {
-        this.flow = res
-        const processIdx = res.findIndex(item => item.status === 'process')
-        this.activeStep = processIdx >= 0 ? processIdx : res.length - 1
+        this.flow = res.data
+        const processIdx = res.data.findIndex(item => item.status === 'process')
+        this.activeStep = processIdx >= 0 ? processIdx : res.data.length - 1
       })
     },
     handlePass() {

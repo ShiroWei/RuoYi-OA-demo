@@ -74,7 +74,7 @@ export default {
     loadEvents() {
       this.loading = true
       listCalendarEvent('').then(res => {
-        this._events = res
+        this._events = res.data || []
         this.loading = false
         this.loadDayEvents()
       })

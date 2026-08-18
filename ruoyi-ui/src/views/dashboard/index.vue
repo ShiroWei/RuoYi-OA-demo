@@ -279,7 +279,7 @@ export default {
     loadSchedule() {
       listCalendarEvent('').then(res => {
         const d = this.formatKey(new Date())
-        this.dayEvents = (res || []).filter(ev => ev.eventDate === d)
+        this.dayEvents = (res.data || []).filter(ev => ev.eventDate === d)
       })
     },
     loadNotice() {

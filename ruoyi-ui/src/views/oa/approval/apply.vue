@@ -83,8 +83,8 @@ export default {
         }
         submitApply(data).then(res => {
           this.submitting = false
-          this.$modal.msgSuccess('提交成功，单号：' + res.applyNo)
-          this.$router.push('/oa/approval/detail/' + res.id)
+          this.$modal.msgSuccess('提交成功，单号：' + res.data.applyNo)
+          this.$router.push('/oa/approval/detail/' + res.data.applyId)
         })
       })
     },
