@@ -46,3 +46,12 @@ export function getRaddarChartData() {
     series: [81, 92, 76, 68, 85, 88]
   })
 }
+
+// 智能助手问答（当前为后端规则 mock，返回结构化 JSON，后续可接入真实模型）
+export function chatAi(message) {
+  return request({
+    url: '/oa/ai/chat',
+    method: 'post',
+    data: { message }
+  })
+}

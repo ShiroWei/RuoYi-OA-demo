@@ -172,6 +172,8 @@
         </div>
       </el-col>
     </el-row>
+
+    <ai-assistant />
   </div>
 </template>
 
@@ -181,6 +183,7 @@ import LineChart from './LineChart'
 import RaddarChart from './RaddarChart'
 import PieChart from './PieChart'
 import BarChart from './BarChart'
+import AiAssistant from './AiAssistant'
 import { getPanelData, getLineChartData, getBarChartData, getPieChartData, getRaddarChartData } from '@/api/dashboard'
 import { listTodo } from '@/api/todo'
 import { listCalendarEvent } from '@/api/calendar'
@@ -212,7 +215,8 @@ export default {
     LineChart,
     RaddarChart,
     PieChart,
-    BarChart
+    BarChart,
+    AiAssistant
   },
   data() {
     return {
@@ -255,15 +259,16 @@ export default {
         this.panel = Object.assign({}, this.panel, res.data)
       })
       getLineChartData().then(res => {
-        defaultLineData.todo.expectedData = res.expectedData
-        defaultLineData.todo.actualData = res.actualData
+        const data = res.data || {}
+        defaultLineData.todo.expectedData = data.expectedData
+        defaultLineData.todo.actualData = data.actualData
         this.lineChartData = defaultLineData.todo
       })
       getBarChartData().then(res => {
-        this.barChartData = res
+        this.barChartData = res.data
       })
       getPieChartData().then(res => {
-        this.pieChartData = res
+        this.pieChartData = res.data
       })
       getRaddarChartData().then(res => {
         this.raddarChartData = res
