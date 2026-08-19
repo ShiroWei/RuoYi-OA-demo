@@ -21,7 +21,7 @@
         </div>
         <div class="stat-item">
           <div class="stat-num">{{ panel.todayOnline }}</div>
-          <div class="stat-label">在线同事</div>
+          <div class="stat-label">同事总数</div>
         </div>
       </div>
     </div>
@@ -252,7 +252,7 @@ export default {
     },
     loadData() {
       getPanelData().then(res => {
-        this.panel = res
+        this.panel = Object.assign({}, this.panel, res.data)
       })
       getLineChartData().then(res => {
         defaultLineData.todo.expectedData = res.expectedData
@@ -286,6 +286,7 @@ export default {
       listNoticeTop().then(res => {
         const list = res.data || []
         this.notices = Array.isArray(list) ? list.slice(0, 3) : []
+        this.panel.msgCount = res.unreadCount || 0
       })
     },
     formatKey(date) {

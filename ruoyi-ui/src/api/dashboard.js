@@ -1,71 +1,38 @@
 import request from '@/utils/request'
 
-// 首页工作台统计卡片数据
-// 当前返回 mock 演示数据；接入真实接口后，改为 request 调用即可：
-// export function getPanelData() {
-//   return request({
-//     url: '/system/dashboard/panel',
-//     method: 'get'
-//   })
-// }
+// 首页工作台统计卡片数据（真实聚合：待办/审批/通讯录）
 export function getPanelData() {
-  return Promise.resolve({
-    todoCount: 12,
-    msgCount: 8,
-    leaveCount: 3,
-    finishCount: 56,
-    todayOnline: 128,
-    weekLeave: 23
+  return request({
+    url: '/oa/dashboard/panel',
+    method: 'get'
   })
 }
 
-// 首页折线图数据（近7日趋势）
-// 真实接口：
-// export function getLineChartData() {
-//   return request({ url: '/system/dashboard/line', method: 'get' })
-// }
+// 首页折线图数据（近7日申请/通过趋势）
 export function getLineChartData() {
-  return Promise.resolve({
-    expectedData: [100, 120, 161, 134, 105, 160, 165],
-    actualData: [120, 82, 91, 154, 162, 140, 145]
+  return request({
+    url: '/oa/dashboard/line',
+    method: 'get'
   })
 }
 
-// 首页柱状图数据（各部门审批量）
-// 真实接口：
-// export function getBarChartData() {
-//   return request({ url: '/system/dashboard/bar', method: 'get' })
-// }
+// 首页柱状图数据（近9周各部门申请量）
 export function getBarChartData() {
-  return Promise.resolve({
-    pageA: [30, 42, 35, 51, 49, 62, 69, 91, 126],
-    pageB: [20, 32, 25, 41, 39, 52, 59, 71, 96],
-    pageC: [10, 22, 15, 31, 29, 42, 49, 61, 76]
+  return request({
+    url: '/oa/dashboard/bar',
+    method: 'get'
   })
 }
 
 // 首页饼图数据（审批单类型分布）
-// 真实接口：
-// export function getPieChartData() {
-//   return request({ url: '/system/dashboard/pie', method: 'get' })
-// }
 export function getPieChartData() {
-  return Promise.resolve({
-    series: [
-      { value: 335, name: '请假申请' },
-      { value: 310, name: '报销申请' },
-      { value: 234, name: '出差申请' },
-      { value: 135, name: '用章申请' },
-      { value: 148, name: '其他' }
-    ]
+  return request({
+    url: '/oa/dashboard/pie',
+    method: 'get'
   })
 }
 
-// 首页雷达图数据（办公效率多维评估）
-// 真实接口：
-// export function getRaddarChartData() {
-//   return request({ url: '/system/dashboard/raddar', method: 'get' })
-// }
+// 首页雷达图数据（办公效率多维评估，暂无真实业务数据源，保留演示数据）
 export function getRaddarChartData() {
   return Promise.resolve({
     indicator: [
