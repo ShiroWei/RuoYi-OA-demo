@@ -92,12 +92,12 @@ oa
 
 环境要求：JDK 17+、Maven 3.9+、Node 16/18/20、MySQL 8、Redis、Nacos 3.x。
 
-1. 初始化数据库（建库 `ry-cloud` 后依次导入）：`sql/ry_20260417.sql`、`sql/ry_config_20260611.sql`、`sql/quartz.sql`、`sql/oa_tables.sql`（OA 业务表 + 演示数据）。
+1. 初始化数据库（建库 `ry-cloud` 后依次导入）：`sql/ry_20260417.sql`、`sql/ry_config_20260611.sql`、`sql/ry_config_oa_20260819.sql`（OA 运行配置增量）、`sql/quartz.sql`、`sql/oa_tables.sql`（OA 业务表 + 演示数据）。
 2. 启动 Nacos（3.0.2，默认端口 8848）：`startup.cmd -m standalone`（单机模式）。
 3. 依次启动后端微服务：`ruoyi-gateway`(8000) → `ruoyi-auth`(9200) → `ruoyi-modules-system`(9201) → `ruoyi-modules-oa`(9204) → 其他模块（gen/job/file/monitor）。
 4. 前端：`cd ruoyi-ui && npm install && npm run dev`（默认端口 80，若被系统保留端口占用会回退到 8081，代理指向网关 8000）。
 
-> Nacos 配置：网关路由 `/oa/**` 已指向 OA 服务，`/code` 已加入白名单（登录验证码）；OA 数据源复用 `ry-cloud` 库。
+> Nacos 配置：网关路由 `/oa/**` 已指向 OA 服务，`/code` 已加入白名单（登录验证码）；OA 数据源复用 `ry-cloud` 库。运行时配置已同步回仓库，见 `sql/ry_config_oa_20260819.sql`（初始化 `ry_config_20260611.sql` 之后执行）。
 
 详细说明见 [docs/本地开发环境配置.md](docs/本地开发环境配置.md)。
 
