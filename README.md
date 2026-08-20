@@ -39,6 +39,29 @@ OA协同办公平台是一套**演示性质**的办公自动化（Office Automat
 
 > **审批闭环**：申请状态统一为 `待审批(0) → 已通过(1) / 已驳回(2)`；流程节点状态为 `finish（已完成）/ process（处理中）/ wait（等待）`，发起与审批均真实联动待办中心。
 
+## 服务架构
+
+OA 业务按功能拆分为 5 个独立微服务，前端统一经网关（8000）访问；审批与待办之间、工作台聚合服务与各业务服务之间通过 Feign 跨服务调用。
+
+```mermaid
+graph LR
+    UI[ruoyi-ui :80] --> GW[ruoyi-gateway :8000]
+    GW --> AUTH[ruoyi-auth :9200]
+    GW --> SYS[ruoyi-system :9201]
+    GW --> AP[ruoyi-approval :9210]
+    GW --> TD[ruoyi-todo :9211]
+    GW --> CA[ruoyi-calendar :9212]
+    GW --> CO[ruoyi-contacts :9213]
+    GW --> PO[ruoyi-portal :9214]
+    AP -.Feign 生成/完成待办.-> TD
+    PO -.Feign 聚合统计.-> AP
+    PO -.Feign 聚合统计.-> TD
+    PO -.Feign 聚合统计.-> CA
+    PO -.Feign 聚合统计.-> CO
+```
+
+> 说明：`ruoyi-portal` 承载工作台统计（dashboard）与智能助手（ai），不持有数据，通过 Feign 聚合四业务服务；跨服务接口定义在 `ruoyi-api/ruoyi-api-oa`。
+
 ## 技术栈
 
 | 组件                   | 版本                 |
@@ -63,6 +86,7 @@ oa
 ├── ruoyi-auth            // 认证中心 [9200]
 ├── ruoyi-api             // 接口模块
 │       └── ruoyi-api-system                          // 系统接口
+│       └── ruoyi-api-oa                              // OA 跨服务接口（共享 domain + Feign Client）
 ├── ruoyi-common          // 通用模块
 │       └── ruoyi-common-core                         // 核心模块
 │       └── ruoyi-common-datascope                    // 权限范围
@@ -134,8 +158,9 @@ docs/                      # 本地开发环境配置文档
 | 展示层改造    | 品牌中性化、OA 工作台首页、登录页打磨   | 已完成              |
 | OA 业务模块  | 待办中心、审批中心、会议日程、通讯录     | 已完成（真实接口 + 审批闭环） |
 | 工作台统计真实化 | 工作台统计面板与图表数据接入后端 | 已完成（统计面板/近7日趋势/类型分布/部门申请量为真实聚合；效率雷达为演示评估） |
+| 智能助手    | 工作台对话助手（待办/审批/日程/统计问答） | 已完成（规则 mock + 真实业务数据，可平滑接入大模型） |
+| 微服务拆分    | OA 按业务功能拆分为审批/待办/日程/通讯录/聚合五服务 | 已完成（9210-9214，Feign 跨服务联动） |
 | 工作流引擎    | 接入 Flowable，实现流程引擎驱动审批 | 规划中              |
-| AI 能力    | 预留 Agent 接口（先定义接口契约）   | 规划中              |
 | 交付方式     | 独立部署（每客户一套）            | 规划中              |
 
 ## 分支约定
