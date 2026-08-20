@@ -212,6 +212,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- OA 跨服务接口 -->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-api-oa</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
