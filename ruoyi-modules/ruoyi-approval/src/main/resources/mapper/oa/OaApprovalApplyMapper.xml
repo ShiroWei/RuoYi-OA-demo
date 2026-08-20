@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.approval.mapper.OaApprovalApplyMapper">
+
+    <resultMap type="OaApprovalApply" id="OaApprovalApplyResult">
+        <result property="applyId"    column="apply_id"    />
+        <result property="applyNo"    column="apply_no"    />
+        <result property="title"      column="title"      />
+        <result property="applyType"  column="apply_type"  />
+        <result property="applicantId" column="applicant_id" />
+        <result property="applicant"  column="applicant"  />
+        <result property="deptName"   column="dept_name"   />
+        <result property="content"    column="content"    />
+        <result property="startDate"  column="start_date"  />
+        <result property="endDate"    column="end_date"    />
+        <result property="days"       column="days"       />
+        <result property="amount"     column="amount"     />
+        <result property="status"     column="status"     />
+        <result property="currentNode" column="current_node" />
+        <result property="applyTime"  column="apply_time"  />
+        <result property="createBy"   column="create_by"   />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy"   column="update_by"   />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="selectOaApprovalApplyVo">
+        select apply_id, apply_no, title, apply_type, applicant_id, applicant, dept_name,
+               content, start_date, end_date, days, amount, status, current_node, apply_time
+        from approval_apply
+    </sql>
+
+    <select id="selectOaApprovalApplyList" parameterType="OaApprovalApply" resultMap="OaApprovalApplyResult">
+        <include refid="selectOaApprovalApplyVo"/>
+        <where>
+            <if test="title != null and title != ''"> and title like concat('%', #{title}, '%')</if>
+            <if test="applyType != null and applyType != ''"> and apply_type = #{applyType}</if>
+            <if test="applicantId != null"> and applicant_id = #{applicantId}</if>
+            <if test="status != null and status != ''"> and status = #{status}</if>
+            <if test="statuses != null and statuses.length > 0">
+                and status in
+                <foreach item="s" collection="statuses" open="(" separator="," close=")">
+                    #{s}
+                </foreach>
+            </if>
+        </where>
+        order by apply_time desc
+    </select>
+
+    <select id="selectOaApprovalApplyById" parameterType="Long" resultMap="OaApprovalApplyResult">
+        <include refid="selectOaApprovalApplyVo"/>
+        where apply_id = #{applyId}
+    </select>
+
+    <insert id="insertOaApprovalApply" parameterType="OaApprovalApply" useGeneratedKeys="true" keyProperty="applyId">
+        insert into approval_apply
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="applyNo != null">apply_no,</if>
+            <if test="title != null">title,</if>
+            <if test="applyType != null">apply_type,</if>
+            <if test="applicantId != null">applicant_id,</if>
+            <if test="applicant != null">applicant,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="content != null">content,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="days != null">days,</if>
+            <if test="amount != null">amount,</if>
+            <if test="status != null">status,</if>
+            <if test="currentNode != null">current_node,</if>
+            <if test="applyTime != null">apply_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="applyNo != null">#{applyNo},</if>
+            <if test="title != null">#{title},</if>
+            <if test="applyType != null">#{applyType},</if>
+            <if test="applicantId != null">#{applicantId},</if>
+            <if test="applicant != null">#{applicant},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="content != null">#{content},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="days != null">#{days},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="status != null">#{status},</if>
+            <if test="currentNode != null">#{currentNode},</if>
+            <if test="applyTime != null">#{applyTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateOaApprovalApply" parameterType="OaApprovalApply">
+        update approval_apply
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="applyType != null">apply_type = #{applyType},</if>
+            <if test="applicantId != null">applicant_id = #{applicantId},</if>
+            <if test="applicant != null">applicant = #{applicant},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="days != null">days = #{days},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="currentNode != null">current_node = #{currentNode},</if>
+            <if test="applyTime != null">apply_time = #{applyTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where apply_id = #{applyId}
+    </update>
+
+    <delete id="deleteOaApprovalApplyById" parameterType="Long">
+        delete from approval_apply where apply_id = #{applyId}
+    </delete>
+
+    <delete id="deleteOaApprovalApplyByIds" parameterType="String">
+        delete from approval_apply where apply_id in
+        <foreach item="applyId" collection="array" open="(" separator="," close=")">
+            #{applyId}
+        </foreach>
+    </delete>
+</mapper>
