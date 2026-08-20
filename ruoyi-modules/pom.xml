@@ -10,6 +10,11 @@
 
     <modules>
         <module>ruoyi-oa</module>
+        <module>ruoyi-approval</module>
+        <module>ruoyi-todo</module>
+        <module>ruoyi-calendar</module>
+        <module>ruoyi-contacts</module>
+        <module>ruoyi-portal</module>
         <module>ruoyi-system</module>
         <module>ruoyi-gen</module>
         <module>ruoyi-job</module>
