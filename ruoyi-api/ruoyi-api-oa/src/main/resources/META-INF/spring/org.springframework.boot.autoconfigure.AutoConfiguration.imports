@@ -1,0 +1,4 @@
+com.ruoyi.oa.api.factory.RemoteOaTodoFallbackFactory
+com.ruoyi.oa.api.factory.RemoteOaApprovalFallbackFactory
+com.ruoyi.oa.api.factory.RemoteOaCalendarFallbackFactory
+com.ruoyi.oa.api.factory.RemoteOaContactsFallbackFactory
