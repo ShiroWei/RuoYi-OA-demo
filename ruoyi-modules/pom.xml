@@ -9,7 +9,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
-        <module>ruoyi-oa</module>
         <module>ruoyi-approval</module>
         <module>ruoyi-todo</module>
         <module>ruoyi-calendar</module>
