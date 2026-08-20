@@ -44,3 +44,5 @@ nbdist/
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
+# 内部开发文档（不入库）
+AGENTS.md
