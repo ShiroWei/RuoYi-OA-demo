@@ -46,3 +46,4 @@ nbdist/
 !*/build/*.xml
 # 内部开发文档（不入库）
 docs/INTERNAL.md
+docs/源码笔记/
