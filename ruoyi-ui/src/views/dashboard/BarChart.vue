@@ -38,7 +38,7 @@ export default {
     chartData: {
       deep: true,
       handler(val) {
-        if (this.chart && val && val.pageA) {
+        if (this.chart) {
           this.setOptions(val)
         }
       }
@@ -57,27 +57,12 @@ export default {
     this.chart = null
   },
   methods: {
-    defaultData() {
-      return {
-        pageA: [30, 42, 35, 51, 49, 62, 69, 91, 126],
-        pageB: [20, 32, 25, 41, 39, 52, 59, 71, 96],
-        pageC: [10, 22, 15, 31, 29, 42, 49, 61, 76]
-      }
-    },
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-      if (this.chartData && this.chartData.pageA) {
-        this.setOptions(this.chartData)
-      } else {
-        this.setOptions(this.defaultData())
-      }
+      this.setOptions(this.chartData)
     },
     setOptions(chartData) {
-      const { pageA, pageB, pageC } = chartData
-      const xData = []
-      for (let i = 1; i <= pageA.length; i++) {
-        xData.push('第' + i + '周')
-      }
+      const { pageA = [], pageB = [], pageC = [], dates = [] } = chartData || {}
       this.chart.setOption({
         tooltip: {
           trigger: 'axis',
@@ -88,18 +73,18 @@ export default {
         legend: {
           left: 'center',
           bottom: '10',
-          data: ['报销申请', '出差申请', '请假申请']
+          data: ['请假申请', '报销申请', '出差申请']
         },
         grid: {
           top: 10,
           left: '2%',
           right: '2%',
-          bottom: '3%',
+          bottom: 50,
           containLabel: true
         },
         xAxis: [{
           type: 'category',
-          data: xData,
+          data: dates,
           axisTick: {
             alignWithLabel: true
           }
@@ -111,21 +96,21 @@ export default {
           }
         }],
         series: [{
-          name: '报销申请',
+          name: '请假申请',
           type: 'bar',
           stack: 'apply',
           barWidth: '60%',
           data: pageA,
           animationDuration
         }, {
-          name: '出差申请',
+          name: '报销申请',
           type: 'bar',
           stack: 'apply',
           barWidth: '60%',
           data: pageB,
           animationDuration
         }, {
-          name: '请假申请',
+          name: '出差申请',
           type: 'bar',
           stack: 'apply',
           barWidth: '60%',

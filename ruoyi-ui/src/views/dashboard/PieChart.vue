@@ -36,7 +36,7 @@ export default {
     chartData: {
       deep: true,
       handler(val) {
-        if (this.chart && val && val.series) {
+        if (this.chart) {
           this.setOptions(val)
         }
       }
@@ -55,27 +55,12 @@ export default {
     this.chart = null
   },
   methods: {
-    defaultData() {
-      return {
-        series: [
-          { value: 335, name: '请假申请' },
-          { value: 310, name: '报销申请' },
-          { value: 234, name: '出差申请' },
-          { value: 135, name: '用章申请' },
-          { value: 148, name: '其他' }
-        ]
-      }
-    },
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-      if (this.chartData && this.chartData.series) {
-        this.setOptions(this.chartData)
-      } else {
-        this.setOptions(this.defaultData())
-      }
+      this.setOptions(this.chartData)
     },
     setOptions(chartData) {
-      const { series } = chartData
+      const { series = [] } = chartData || {}
       this.chart.setOption({
         tooltip: {
           trigger: 'item',

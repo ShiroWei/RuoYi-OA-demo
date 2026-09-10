@@ -12,6 +12,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.oa.api.RemoteOaApprovalService;
 import com.ruoyi.oa.api.RemoteOaContactsService;
 import com.ruoyi.oa.api.RemoteOaTodoService;
@@ -53,6 +54,7 @@ public class OaDashboardServiceImpl implements IOaDashboardService
         map.put("leaveCount", applies.stream().filter(a -> "请假".equals(a.getApplyType()) && "0".equals(a.getStatus())).count());
 
         LocalDate now = LocalDate.now();
+        // 上游未提供完成时间，保留按申请月份统计当前已通过数的口径。
         long finishCount = applies.stream()
                 .filter(a -> "1".equals(a.getStatus()))
                 .map(a -> toLocalDate(a.getApplyTime()))
@@ -73,7 +75,7 @@ public class OaDashboardServiceImpl implements IOaDashboardService
     }
 
     /**
-     * 近7日趋势：expectedData 每日申请数 / actualData 每日通过数
+     * 近7日趋势：按申请日期统计申请数及其中当前已通过数，并非审批完成日期
      */
     @Override
     public Map<String, Object> line()
@@ -102,6 +104,12 @@ public class OaDashboardServiceImpl implements IOaDashboardService
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("expectedData", expected);
         map.put("actualData", actual);
+        List<String> dates = new ArrayList<String>();
+        for (int i = 6; i >= 0; i--)
+        {
+            dates.add(today.minusDays(i).toString());
+        }
+        map.put("dates", dates);
         return map;
     }
 
@@ -136,6 +144,12 @@ public class OaDashboardServiceImpl implements IOaDashboardService
         map.put("pageA", weeks[0]);
         map.put("pageB", weeks[1]);
         map.put("pageC", weeks[2]);
+        List<String> dates = new ArrayList<String>();
+        for (int i = 8; i >= 0; i--)
+        {
+            dates.add(weekStart(today).minusWeeks(i).toString());
+        }
+        map.put("dates", dates);
         return map;
     }
 
@@ -168,19 +182,31 @@ public class OaDashboardServiceImpl implements IOaDashboardService
     private List<OaApprovalApply> approvalList()
     {
         R<List<OaApprovalApply>> r = remoteApprovalService.listApproval();
-        return R.isSuccess(r) && r.getData() != null ? r.getData() : new ArrayList<OaApprovalApply>();
+        if (r == null || !R.isSuccess(r) || r.getData() == null)
+        {
+            throw new ServiceException("审批数据暂不可用，请稍后重试");
+        }
+        return r.getData();
     }
 
     private List<OaTodoItem> todoList()
     {
         R<List<OaTodoItem>> r = remoteTodoService.listTodo();
-        return R.isSuccess(r) && r.getData() != null ? r.getData() : new ArrayList<OaTodoItem>();
+        if (r == null || !R.isSuccess(r) || r.getData() == null)
+        {
+            throw new ServiceException("待办数据暂不可用，请稍后重试");
+        }
+        return r.getData();
     }
 
     private List<OaContactPerson> contactList()
     {
         R<List<OaContactPerson>> r = remoteContactsService.listContact();
-        return R.isSuccess(r) && r.getData() != null ? r.getData() : new ArrayList<OaContactPerson>();
+        if (r == null || !R.isSuccess(r) || r.getData() == null)
+        {
+            throw new ServiceException("通讯录数据暂不可用，请稍后重试");
+        }
+        return r.getData();
     }
 
     private LocalDate toLocalDate(Date date)

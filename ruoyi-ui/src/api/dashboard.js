@@ -8,7 +8,7 @@ export function getPanelData() {
   })
 }
 
-// 首页折线图数据（近7日申请/通过趋势）
+// 首页折线图数据（按申请日期统计申请数及其中当前已通过数）
 export function getLineChartData() {
   return request({
     url: '/oa/dashboard/line',
@@ -16,7 +16,7 @@ export function getLineChartData() {
   })
 }
 
-// 首页柱状图数据（近9周各部门申请量）
+// 首页柱状图数据（近9周请假/报销/出差申请量）
 export function getBarChartData() {
   return request({
     url: '/oa/dashboard/bar',

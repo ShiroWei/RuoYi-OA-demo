@@ -4,20 +4,20 @@
     <div class="welcome-banner">
       <div class="welcome-info">
         <div class="welcome-title">欢迎回来，{{ name }}</div>
-        <div class="welcome-sub">今天是 {{ today }}，开启高效协同办公的一天</div>
+        <div class="welcome-sub">今天是 {{ today }}，统计为全平台口径，待办列表为个人口径</div>
       </div>
-      <div class="welcome-stats">
+      <div v-if="loadState.panel === 'success'" class="welcome-stats">
         <div class="stat-item">
           <div class="stat-num">{{ panel.todoCount }}</div>
           <div class="stat-label">待办事项</div>
         </div>
         <div class="stat-item">
           <div class="stat-num">{{ panel.leaveCount }}</div>
-          <div class="stat-label">审批中</div>
+          <div class="stat-label">请假审批中</div>
         </div>
         <div class="stat-item">
           <div class="stat-num">{{ panel.finishCount }}</div>
-          <div class="stat-label">本月完成</div>
+          <div class="stat-label">本月申请已通过</div>
         </div>
         <div class="stat-item">
           <div class="stat-num">{{ panel.todayOnline }}</div>
@@ -25,6 +25,8 @@
         </div>
       </div>
     </div>
+    <el-alert v-if="loadState.panel !== 'success'" :title="loadState.panel === 'error' ? '统计加载失败，无法显示数量' : '统计加载中'" :type="loadState.panel === 'error' ? 'error' : 'info'" :closable="false" />
+    <el-button v-if="Object.values(loadState).includes('error')" type="text" @click="loadData(); loadTodo(); loadSchedule(); loadNotice()">重新加载失败数据</el-button>
 
     <!-- 快捷入口 -->
     <el-row :gutter="16" class="quick-entry-row">
@@ -63,12 +65,13 @@
             <el-button type="text" @click="handleGo('/oa/todo')">查看全部</el-button>
           </div>
           <div v-loading="todoLoading">
-            <div v-for="item in todoList" :key="item.todoId" class="todo-item" @click="handleGo('/oa/approval/detail/' + item.bizId)">
+            <el-alert v-if="loadState.todo === 'error'" title="待办加载失败，请重试" type="error" :closable="false" />
+            <div v-for="item in todoList" :key="item.todoId" class="todo-item" @click="handleGo(item.bizType === 'approval' && item.bizId ? '/oa/approval/detail/' + item.bizId : '/oa/todo')">
               <el-tag size="mini" :type="priorityType(item.priority)">{{ item.priority }}</el-tag>
               <span class="todo-title">{{ item.title }}</span>
               <span class="todo-time">{{ item.submitTime }}</span>
             </div>
-            <el-empty v-if="!todoLoading && todoList.length === 0" description="暂无待办事项" :image-size="70" />
+            <el-empty v-if="loadState.todo === 'success' && todoList.length === 0" description="暂无待办事项" :image-size="70" />
           </div>
         </el-card>
       </el-col>
@@ -79,30 +82,32 @@
             <span>今日日程</span>
             <el-button type="text" @click="handleGo('/oa/calendar')">更多</el-button>
           </div>
+          <el-alert v-if="loadState.schedule !== 'success'" :title="loadState.schedule === 'error' ? '日程加载失败，请重试' : '日程加载中'" :type="loadState.schedule === 'error' ? 'error' : 'info'" :closable="false" />
           <div v-for="ev in dayEvents" :key="ev.eventId" class="schedule-item">
             <div class="schedule-time">{{ ev.startTime }}</div>
             <div class="schedule-title">{{ ev.title }}</div>
           </div>
-          <el-empty v-if="dayEvents.length === 0" description="今日暂无日程" :image-size="70" />
+          <el-empty v-if="loadState.schedule === 'success' && dayEvents.length === 0" description="今日暂无日程" :image-size="70" />
         </el-card>
 
         <el-card shadow="never" class="workspace-card notice-card">
           <div slot="header" class="card-header">
             <span>最新公告</span>
           </div>
+          <el-alert v-if="loadState.notice !== 'success'" :title="loadState.notice === 'error' ? '公告加载失败，请重试' : '公告加载中'" :type="loadState.notice === 'error' ? 'error' : 'info'" :closable="false" />
           <div v-for="n in notices" :key="n.noticeId" class="notice-item">
             <span class="notice-title">{{ n.noticeTitle }}</span>
             <span class="notice-time">{{ n.createTime }}</span>
           </div>
-          <el-empty v-if="notices.length === 0" description="暂无公告" :image-size="70" />
+          <el-empty v-if="loadState.notice === 'success' && notices.length === 0" description="暂无公告" :image-size="70" />
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="32" class="panel-group">
+    <el-row v-if="loadState.panel === 'success'" :gutter="32" class="panel-group">
       <el-col :xs="12" :sm="12" :lg="6">
-        <div class="card-panel" @click="handleSetLineChartData('todo')">
+        <div class="card-panel">
           <div class="card-panel-icon-wrapper icon-todo">
             <svg-icon icon-class="message" class-name="card-panel-icon" />
           </div>
@@ -113,18 +118,19 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="12" :lg="6">
-        <div class="card-panel" @click="handleSetLineChartData('msg')">
+        <div class="card-panel">
           <div class="card-panel-icon-wrapper icon-msg">
             <svg-icon icon-class="bell" class-name="card-panel-icon" />
           </div>
           <div class="card-panel-description">
             <div class="card-panel-text">未读消息</div>
-            <count-to :start-val="0" :end-val="panel.msgCount" :duration="3000" class="card-panel-num" />
+            <count-to v-if="loadState.notice === 'success'" :start-val="0" :end-val="panel.msgCount" :duration="3000" class="card-panel-num" />
+            <span v-else>{{ loadState.notice === 'error' ? '加载失败' : '加载中' }}</span>
           </div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="12" :lg="6">
-        <div class="card-panel" @click="handleSetLineChartData('leave')">
+        <div class="card-panel">
           <div class="card-panel-icon-wrapper icon-leave">
             <svg-icon icon-class="time" class-name="card-panel-icon" />
           </div>
@@ -135,12 +141,12 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="12" :lg="6">
-        <div class="card-panel" @click="handleSetLineChartData('finish')">
+        <div class="card-panel">
           <div class="card-panel-icon-wrapper icon-finish">
             <svg-icon icon-class="tree" class-name="card-panel-icon" />
           </div>
           <div class="card-panel-description">
-            <div class="card-panel-text">本月已完成</div>
+            <div class="card-panel-text">本月申请已通过</div>
             <count-to :start-val="0" :end-val="panel.finishCount" :duration="3600" class="card-panel-num" />
           </div>
         </div>
@@ -148,27 +154,30 @@
     </el-row>
 
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <div class="chart-title">近 7 日工作动态趋势</div>
-      <line-chart :chart-data="lineChartData" />
+      <div class="chart-title">近 7 日申请及已通过数量（按申请日期）</div>
+      <el-alert v-if="loadState.line !== 'success'" :title="loadState.line === 'error' ? '趋势加载失败，请重试' : '趋势加载中'" :type="loadState.line === 'error' ? 'error' : 'info'" :closable="false" />
+      <line-chart v-else :chart-data="lineChartData" />
     </el-row>
 
     <el-row :gutter="32">
       <el-col :xs="24" :sm="24" :lg="8">
         <div class="chart-wrapper">
-          <div class="chart-title">协同办公效率评估</div>
+          <div class="chart-title">协同办公效率评估（模拟数据）</div>
           <raddar-chart :chart-data="raddarChartData" />
         </div>
       </el-col>
       <el-col :xs="24" :sm="24" :lg="8">
         <div class="chart-wrapper">
           <div class="chart-title">审批类型分布</div>
-          <pie-chart :chart-data="pieChartData" />
+          <el-alert v-if="loadState.pie !== 'success'" :title="loadState.pie === 'error' ? '分布加载失败，请重试' : '分布加载中'" :type="loadState.pie === 'error' ? 'error' : 'info'" :closable="false" />
+          <pie-chart v-else :chart-data="pieChartData" />
         </div>
       </el-col>
       <el-col :xs="24" :sm="24" :lg="8">
         <div class="chart-wrapper">
-          <div class="chart-title">各部门申请量</div>
-          <bar-chart :chart-data="barChartData" />
+          <div class="chart-title">近 9 周各类型申请量（周一起始）</div>
+          <el-alert v-if="loadState.bar !== 'success'" :title="loadState.bar === 'error' ? '申请量加载失败，请重试' : '申请量加载中'" :type="loadState.bar === 'error' ? 'error' : 'info'" :closable="false" />
+          <bar-chart v-else :chart-data="barChartData" />
         </div>
       </el-col>
     </el-row>
@@ -189,25 +198,6 @@ import { listTodo } from '@/api/todo'
 import { listCalendarEvent } from '@/api/calendar'
 import { listNoticeTop } from '@/api/system/notice'
 
-const defaultLineData = {
-  todo: {
-    expectedData: [100, 115, 109, 128, 110, 106, 112],
-    actualData: [88, 102, 96, 115, 99, 95, 112]
-  },
-  msg: {
-    expectedData: [120, 118, 125, 116, 122, 128, 108],
-    actualData: [105, 102, 108, 100, 106, 110, 108]
-  },
-  leave: {
-    expectedData: [83, 95, 84, 72, 96, 83, 73],
-    actualData: [72, 84, 73, 61, 85, 72, 73]
-  },
-  finish: {
-    expectedData: [140, 152, 145, 161, 149, 158, 156],
-    actualData: [125, 135, 130, 142, 133, 140, 156]
-  }
-}
-
 export default {
   name: 'Dashboard',
   components: {
@@ -222,6 +212,7 @@ export default {
     return {
       name: '管理员',
       today: '',
+      loadState: { panel: '', line: '', bar: '', pie: '', todo: '', schedule: '', notice: '' },
       panel: {
         todoCount: 0,
         msgCount: 0,
@@ -234,7 +225,7 @@ export default {
       todoLoading: false,
       dayEvents: [],
       notices: [],
-      lineChartData: defaultLineData.todo,
+      lineChartData: {},
       barChartData: {},
       pieChartData: {},
       raddarChartData: {}
@@ -249,46 +240,56 @@ export default {
     this.name = this.$store.state.user.name || '管理员'
   },
   methods: {
+    loadSection(key, request, apply) {
+      if (this.loadState[key] === 'loading' || this.loadState[key] === 'success') return
+      this.loadState[key] = 'loading'
+      return request().then(res => {
+        apply(res)
+        this.loadState[key] = 'success'
+      }).catch(() => {
+        this.loadState[key] = 'error'
+      })
+    },
     formatToday() {
       const d = new Date()
       const week = ['日', '一', '二', '三', '四', '五', '六']
       return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 星期${week[d.getDay()]}`
     },
     loadData() {
-      getPanelData().then(res => {
-        this.panel = Object.assign({}, this.panel, res.data)
+      this.loadSection('panel', getPanelData, res => {
+        const { msgCount, ...panel } = res.data
+        this.panel = Object.assign({}, this.panel, panel)
       })
-      getLineChartData().then(res => {
-        const data = res.data || {}
-        defaultLineData.todo.expectedData = data.expectedData
-        defaultLineData.todo.actualData = data.actualData
-        this.lineChartData = defaultLineData.todo
+      this.loadSection('line', getLineChartData, res => {
+        this.lineChartData = res.data || {}
       })
-      getBarChartData().then(res => {
-        this.barChartData = res.data
+      this.loadSection('bar', getBarChartData, res => {
+        this.barChartData = res.data || {}
       })
-      getPieChartData().then(res => {
-        this.pieChartData = res.data
+      this.loadSection('pie', getPieChartData, res => {
+        this.pieChartData = res.data || {}
       })
       getRaddarChartData().then(res => {
         this.raddarChartData = res
       })
     },
     loadTodo() {
+      if (this.loadState.todo === 'loading' || this.loadState.todo === 'success') return
       this.todoLoading = true
-      listTodo('pending').then(res => {
+      this.loadSection('todo', () => listTodo('pending'), res => {
         this.todoList = (res.rows || []).slice(0, 4)
+      }).finally(() => {
         this.todoLoading = false
       })
     },
     loadSchedule() {
-      listCalendarEvent('').then(res => {
+      this.loadSection('schedule', () => listCalendarEvent(''), res => {
         const d = this.formatKey(new Date())
         this.dayEvents = (res.data || []).filter(ev => ev.eventDate === d)
       })
     },
     loadNotice() {
-      listNoticeTop().then(res => {
+      this.loadSection('notice', listNoticeTop, res => {
         const list = res.data || []
         this.notices = Array.isArray(list) ? list.slice(0, 3) : []
         this.panel.msgCount = res.unreadCount || 0
@@ -307,9 +308,6 @@ export default {
     },
     handleGo(path) {
       this.$router.push(path)
-    },
-    handleSetLineChartData(type) {
-      this.lineChartData = defaultLineData[type]
     }
   }
 }
@@ -502,7 +500,6 @@ export default {
 
     .card-panel {
       height: 108px;
-      cursor: pointer;
       font-size: 12px;
       position: relative;
       overflow: hidden;
@@ -510,28 +507,6 @@ export default {
       background: #fff;
       box-shadow: 4px 4px 40px rgba(0, 0, 0, .05);
       border-color: rgba(0, 0, 0, .05);
-
-      &:hover {
-        .card-panel-icon-wrapper {
-          color: #fff;
-        }
-
-        .icon-todo {
-          background: #40c9c6;
-        }
-
-        .icon-msg {
-          background: #36a3f7;
-        }
-
-        .icon-leave {
-          background: #f4516c;
-        }
-
-        .icon-finish {
-          background: #34bfa3;
-        }
-      }
 
       .icon-todo {
         color: #40c9c6;
@@ -612,20 +587,21 @@ export default {
 }
 
 @media (max-width: 550px) {
-  .card-panel-description {
-    display: none;
-  }
+  .dashboard-editor-container .panel-group .card-panel {
+    margin-bottom: 16px;
 
-  .card-panel-icon-wrapper {
-    float: none !important;
-    width: 100%;
-    height: 100%;
-    margin: 0 !important;
+    .card-panel-icon-wrapper {
+      display: none;
+    }
 
-    .svg-icon {
-      display: block;
-      margin: 14px auto !important;
-      float: none !important;
+    .card-panel-description {
+      float: none;
+      margin: 20px 8px;
+      text-align: center;
+
+      .card-panel-text {
+        font-size: 13px;
+      }
     }
   }
 }
