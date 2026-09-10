@@ -34,8 +34,9 @@ const permission = {
       return new Promise(resolve => {
         // 向后端请求路由数据
         getRouters().then(res => {
-          const sdata = JSON.parse(JSON.stringify(res.data))
-          const rdata = JSON.parse(JSON.stringify(res.data))
+          const routes = filterApplicationRoutes(res.data)
+          const sdata = JSON.parse(JSON.stringify(routes))
+          const rdata = JSON.parse(JSON.stringify(routes))
           const sidebarRoutes = filterAsyncRouter(sdata)
           const rewriteRoutes = filterAsyncRouter(rdata, false, true)
           const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
@@ -50,6 +51,11 @@ const permission = {
       })
     }
   }
+}
+
+// OA 前端与 ERP 共用 sys_menu 时，只加载 OA 业务路由，避免菜单和动态页面串线。
+function filterApplicationRoutes(routes) {
+  return (routes || []).filter(route => !String(route.path || '').startsWith('/erp'))
 }
 
 // 遍历后台传来的路由字符串，转换为组件对象
