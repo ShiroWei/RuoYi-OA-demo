@@ -122,7 +122,7 @@ oa
 
 环境要求：JDK 17+、Maven 3.9+、Node 16/18/20、MySQL 8、Redis、Nacos 3.x。
 
-1. 初始化数据库（建库 `ry-cloud` 后依次导入）：`sql/ry_20260417.sql`、`sql/ry_config_20260611.sql`、`sql/ry_config_oa_20260819.sql`、`sql/ry_config_oa_split_20260820.sql`（OA 配置与路由拆分增量）、`sql/quartz.sql`、`sql/oa_tables.sql`（OA 业务表 + 演示数据）。
+1. 初始化数据库（建库 `ry-cloud` 后依次导入）：`sql/ry_20260417.sql`、`sql/ry_config_20260611.sql`、`sql/ry_config_oa_20260819.sql`、`sql/ry_config_oa_split_20260820.sql`（OA 配置与路由拆分增量）、`sql/quartz.sql`、`sql/oa_tables.sql`（OA 业务表 DDL）。已有旧版 OA 表时不要重导 `oa_tables.sql`，应执行 `sql/oa_table_prefix_migration.sql` 保留数据并统一表名前缀。
 2. 启动 Nacos（3.0.2，默认端口 8848）：`startup.cmd -m standalone`（单机模式）。
 3. 依次启动后端微服务：`ruoyi-gateway`(8000) → `ruoyi-auth`(9200) → `ruoyi-modules-system`(9201) → OA 五个服务（approval 9210 / todo 9211 / calendar 9212 / contacts 9213 / portal 9214）→ 其他模块（gen/job/file/monitor）。
 4. 前端：`cd ruoyi-ui && npm install && npm run dev`（默认端口 80，若被系统保留端口占用会回退到 8081，代理指向网关 8000）。
@@ -138,10 +138,10 @@ ruoyi-ui/                  # 前端（Vue 2 + Element UI）
   src/api/                 # 业务接口（todo / approval / calendar / contacts / dashboard）
   src/views/oa/            # OA 页面（todo / approval / calendar / contacts）
   src/views/dashboard/     # OA 工作台
-ruoyi-modules/ruoyi-approval/   # OA 审批服务（端口 9210，approval_apply / approval_flow）
-ruoyi-modules/ruoyi-todo/       # OA 待办服务（端口 9211，todo_item）
-ruoyi-modules/ruoyi-calendar/   # OA 日程服务（端口 9212，schedule_event）
-ruoyi-modules/ruoyi-contacts/   # OA 通讯录服务（端口 9213，contact_person）
+ruoyi-modules/ruoyi-approval/   # OA 审批服务（端口 9210，oa_approval_apply / oa_approval_flow）
+ruoyi-modules/ruoyi-todo/       # OA 待办服务（端口 9211，oa_todo_item）
+ruoyi-modules/ruoyi-calendar/   # OA 日程服务（端口 9212，oa_schedule_event）
+ruoyi-modules/ruoyi-contacts/   # OA 通讯录服务（端口 9213，oa_contact_person）
 ruoyi-modules/ruoyi-portal/     # OA 工作台聚合服务（端口 9214，dashboard + ai，Feign 聚合）
 ruoyi-api/ruoyi-api-oa/         # OA 跨服务接口（共享 domain + Feign Client）
 ruoyi-gateway/             # 网关（端口 8000）
