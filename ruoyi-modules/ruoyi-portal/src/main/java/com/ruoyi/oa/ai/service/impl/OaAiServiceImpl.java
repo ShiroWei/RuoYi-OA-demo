@@ -4,11 +4,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.oa.ai.service.IOaAiService;
 import com.ruoyi.oa.api.RemoteOaApprovalService;
 import com.ruoyi.oa.api.RemoteOaCalendarService;
@@ -65,6 +69,10 @@ public class OaAiServiceImpl implements IOaAiService
         {
             return applyTypeReply("出差");
         }
+        if (containsAny(msg, "用章"))
+        {
+            return applyTypeReply("用章");
+        }
         if (containsAny(msg, "日程", "会议", "安排"))
         {
             return scheduleReply();
@@ -90,10 +98,15 @@ public class OaAiServiceImpl implements IOaAiService
 
     private Map<String, Object> todoReply()
     {
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null || userId <= 0)
+        {
+            throw new ServiceException("无法确认当前用户，请重新登录");
+        }
         List<OaTodoItem> todos = new ArrayList<OaTodoItem>();
         for (OaTodoItem t : todoList())
         {
-            if ("0".equals(t.getStatus()))
+            if ("0".equals(t.getStatus()) && userId.equals(t.getHandlerId()))
             {
                 todos.add(t);
             }
@@ -104,7 +117,8 @@ public class OaAiServiceImpl implements IOaAiService
             Map<String, Object> it = new HashMap<String, Object>();
             it.put("title", t.getTitle());
             it.put("desc", joinDesc(t.getTodoType(), t.getSubmitter(), fmt(t.getSubmitTime(), "MM-dd HH:mm")));
-            it.put("jumpTo", "/oa/approval/detail/" + t.getBizId());
+            it.put("jumpTo", "approval".equals(t.getBizType()) && t.getBizId() != null
+                    ? "/oa/approval/detail/" + t.getBizId() : "/oa/todo");
             items.add(it);
         }
         Map<String, Object> map = new HashMap<String, Object>();
@@ -214,9 +228,9 @@ public class OaAiServiceImpl implements IOaAiService
         int finish = countFinishThisMonth(applies);
         int online = contactList().size();
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("reply", "工作台概览：待办 " + todo + " 条，请假审批中 " + leave + " 条，本月完成 " + finish + " 项，在职同事 " + online + " 人。");
+        map.put("reply", "工作台概览（全平台）：待办 " + todo + " 条，请假审批中 " + leave + " 条，本月申请已通过 " + finish + " 项，通讯录人数 " + online + " 人。");
         map.put("type", "stat");
-        map.put("items", stats(stat("待办", todo + ""), stat("审批中", leave + ""), stat("本月完成", finish + ""), stat("同事", online + "")));
+        map.put("items", stats(stat("待办", todo + ""), stat("请假审批中", leave + ""), stat("本月申请已通过", finish + ""), stat("通讯录人数", online + "")));
         return map;
     }
 
@@ -224,14 +238,21 @@ public class OaAiServiceImpl implements IOaAiService
     {
         List<OaApprovalApply> applies = approvalList();
         List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
-        for (String type : new String[] { "请假", "报销", "出差" })
+        Set<String> types = new LinkedHashSet<String>();
+        java.util.Collections.addAll(types, "请假", "报销", "出差", "用章");
+        for (OaApprovalApply a : applies)
+        {
+            types.add(a.getApplyType() == null || a.getApplyType().isEmpty() ? "其他" : a.getApplyType());
+        }
+        for (String type : types)
         {
             int pending = 0;
             int passed = 0;
             int rejected = 0;
             for (OaApprovalApply a : applies)
             {
-                if (!type.equals(a.getApplyType()))
+                String applyType = a.getApplyType() == null || a.getApplyType().isEmpty() ? "其他" : a.getApplyType();
+                if (!type.equals(applyType))
                 {
                     continue;
                 }
@@ -262,8 +283,8 @@ public class OaAiServiceImpl implements IOaAiService
     private Map<String, Object> helpReply()
     {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("reply", "您好，我是智能助手，可以帮您快速了解工作台情况。试试问我：\n" + "· 「我的待办」查看待处理事项\n" + "· 「请假 / 报销 / 出差」查看申请进度\n"
-                + "· 「今日日程」查看当天安排\n" + "· 「同事 / 通讯录」查看在职人数\n" + "· 「统计 / 概览」查看工作台汇总");
+        map.put("reply", "您好，我是智能助手，可以帮您快速了解工作台情况。试试问我：\n" + "· 「我的待办」查看待处理事项\n" + "· 「请假 / 报销 / 出差 / 用章」查看申请进度\n"
+                + "· 「今日日程」查看当天安排\n" + "· 「同事 / 通讯录」查看通讯录人数\n" + "· 「统计 / 概览」查看工作台汇总");
         map.put("type", "text");
         map.put("items", new ArrayList<Map<String, Object>>());
         return map;
@@ -272,7 +293,11 @@ public class OaAiServiceImpl implements IOaAiService
     private List<OaApprovalApply> approvalList()
     {
         R<List<OaApprovalApply>> r = remoteApprovalService.listApproval();
-        return R.isSuccess(r) && r.getData() != null ? r.getData() : new ArrayList<OaApprovalApply>();
+        if (r == null || !R.isSuccess(r) || r.getData() == null)
+        {
+            throw new ServiceException("审批数据暂不可用，请稍后重试");
+        }
+        return r.getData();
     }
 
     private List<OaApprovalApply> listApply(String type)
@@ -291,19 +316,31 @@ public class OaAiServiceImpl implements IOaAiService
     private List<OaTodoItem> todoList()
     {
         R<List<OaTodoItem>> r = remoteTodoService.listTodo();
-        return R.isSuccess(r) && r.getData() != null ? r.getData() : new ArrayList<OaTodoItem>();
+        if (r == null || !R.isSuccess(r) || r.getData() == null)
+        {
+            throw new ServiceException("待办数据暂不可用，请稍后重试");
+        }
+        return r.getData();
     }
 
     private List<OaContactPerson> contactList()
     {
         R<List<OaContactPerson>> r = remoteContactsService.listContact();
-        return R.isSuccess(r) && r.getData() != null ? r.getData() : new ArrayList<OaContactPerson>();
+        if (r == null || !R.isSuccess(r) || r.getData() == null)
+        {
+            throw new ServiceException("通讯录数据暂不可用，请稍后重试");
+        }
+        return r.getData();
     }
 
     private List<OaScheduleEvent> eventList()
     {
         R<List<OaScheduleEvent>> r = remoteCalendarService.listEvent();
-        return R.isSuccess(r) && r.getData() != null ? r.getData() : new ArrayList<OaScheduleEvent>();
+        if (r == null || !R.isSuccess(r) || r.getData() == null)
+        {
+            throw new ServiceException("日程数据暂不可用，请稍后重试");
+        }
+        return r.getData();
     }
 
     private int countFinishThisMonth(List<OaApprovalApply> applies)

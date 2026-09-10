@@ -11,7 +11,7 @@
         <div class="ai-header">
           <div class="ai-title">
             <svg-icon icon-class="message" />
-            <span>智能助手</span>
+            <span>智能助手（规则模拟）</span>
           </div>
           <el-button icon="el-icon-close" circle size="mini" class="ai-close" @click="close" />
         </div>
@@ -22,7 +22,7 @@
             <div class="ai-bubble">
               <div class="ai-text">{{ m.reply }}</div>
               <template v-if="m.type === 'list' && m.items.length">
-                <div v-for="(it, idx) in m.items" :key="idx" class="ai-item" @click="jump(it.jumpTo)">
+                <div v-for="(it, idx) in m.items" :key="idx" class="ai-item" :class="{ 'is-link': it.jumpTo }" @click="jump(it.jumpTo)">
                   <div class="ai-item-title">{{ it.title }}</div>
                   <div class="ai-item-desc">{{ it.desc }}</div>
                 </div>
@@ -51,7 +51,7 @@
             :rows="1"
             resize="none"
             placeholder="问我：我的待办 / 请假 / 今日日程 / 统计…"
-            @keyup.enter.native.prevent="send"
+            @keydown.enter.native="handleEnter"
           />
           <el-button type="primary" size="mini" class="ai-send" :loading="loading" @click="send">发送</el-button>
         </div>
@@ -73,7 +73,7 @@ export default {
       messages: [
         {
           role: 'assistant',
-          reply: '您好，我是智能助手。可以问我：我的待办、请假/报销/出差进度、今日日程、同事人数、工作台统计等。',
+          reply: '当前为关键词规则模拟，未接入大模型；查询结果来自业务接口。可以问我：待办、请假/报销/出差进度、今日日程、同事人数、工作台统计等。',
           type: 'text',
           items: []
         }
@@ -83,6 +83,7 @@ export default {
   methods: {
     open() {
       this.visible = true
+      this.scrollToBottom()
     },
     close() {
       this.visible = false
@@ -92,6 +93,11 @@ export default {
         this.$router.push(path)
         this.close()
       }
+    },
+    handleEnter(event) {
+      if (event.isComposing || event.keyCode === 229 || event.target.composing || event.shiftKey) return
+      event.preventDefault()
+      this.send()
     },
     send() {
       const text = (this.input || '').trim()
@@ -106,9 +112,9 @@ export default {
         const data = res.data || {}
         this.messages.push({
           role: 'assistant',
-          reply: data.reply || '',
+          reply: data.reply || '服务未返回有效答复，请稍后再试。',
           type: data.type || 'text',
-          items: data.items || [],
+          items: Array.isArray(data.items) ? data.items : [],
           action: data.action || '',
           jumpUrl: data.jumpUrl || ''
         })
@@ -117,6 +123,7 @@ export default {
       }).catch(() => {
         this.messages.push({ role: 'assistant', reply: '抱歉，服务暂时不可用，请稍后再试。', type: 'text', items: [] })
         this.loading = false
+        this.scrollToBottom()
       })
     },
     scrollToBottom() {
@@ -164,6 +171,9 @@ export default {
   bottom: 72px;
   width: 360px;
   height: 480px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 96px);
+  max-height: calc(100dvh - 96px);
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
@@ -173,6 +183,7 @@ export default {
   z-index: 2001;
 
   .ai-header {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -200,6 +211,7 @@ export default {
 
   .ai-body {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding: 12px;
     background: #f5f7fa;
@@ -239,6 +251,7 @@ export default {
       }
 
       .ai-bubble {
+        min-width: 0;
         max-width: 78%;
         margin: 0 8px;
         padding: 10px 12px;
@@ -263,10 +276,13 @@ export default {
           padding: 8px 10px;
           background: #f5f7fa;
           border-radius: 6px;
-          cursor: pointer;
           transition: background 0.2s;
 
-          &:hover {
+          &.is-link {
+            cursor: pointer;
+          }
+
+          &.is-link:hover {
             background: #e8f4ff;
           }
 
@@ -320,6 +336,7 @@ export default {
   }
 
   .ai-footer {
+    flex-shrink: 0;
     display: flex;
     align-items: flex-end;
     padding: 10px;
@@ -327,6 +344,7 @@ export default {
 
     .el-textarea {
       flex: 1;
+      min-width: 0;
 
       ::v-deep .el-textarea__inner {
         border: none;
@@ -339,6 +357,17 @@ export default {
     .ai-send {
       margin-left: 8px;
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-panel {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    max-width: none;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
   }
 }
 </style>
