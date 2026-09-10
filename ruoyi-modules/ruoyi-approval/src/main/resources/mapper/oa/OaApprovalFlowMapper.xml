@@ -17,7 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="selectOaApprovalFlowVo">
         select flow_id, apply_id, node_name, node_order, handler, handle_time, comment, status
-        from approval_flow
+        from oa_approval_flow
     </sql>
 
     <select id="selectOaApprovalFlowList" parameterType="OaApprovalFlow" resultMap="OaApprovalFlowResult">
@@ -40,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertOaApprovalFlow" parameterType="OaApprovalFlow" useGeneratedKeys="true" keyProperty="flowId">
-        insert into approval_flow
+        insert into oa_approval_flow
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="applyId != null">apply_id,</if>
             <if test="nodeName != null">node_name,</if>
@@ -62,7 +62,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </insert>
 
     <update id="updateOaApprovalFlow" parameterType="OaApprovalFlow">
-        update approval_flow
+        update oa_approval_flow
         <trim prefix="SET" suffixOverrides=",">
             <if test="handler != null">handler = #{handler},</if>
             <if test="handleTime != null">handle_time = #{handleTime},</if>
@@ -73,10 +73,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteOaApprovalFlowById" parameterType="Long">
-        delete from approval_flow where flow_id = #{flowId}
+        delete from oa_approval_flow where flow_id = #{flowId}
     </delete>
 
     <delete id="deleteFlowByApplyId" parameterType="Long">
-        delete from approval_flow where apply_id = #{applyId}
+        delete from oa_approval_flow where apply_id = #{applyId}
     </delete>
 </mapper>

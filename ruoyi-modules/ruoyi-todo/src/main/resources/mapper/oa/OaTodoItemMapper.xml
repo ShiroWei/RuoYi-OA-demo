@@ -21,7 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="selectOaTodoItemVo">
         select todo_id, biz_type, biz_id, title, todo_type, submitter, handler_id,
                priority, status, due_time, submit_time
-        from todo_item
+        from oa_todo_item
     </sql>
 
     <select id="selectOaTodoItemList" parameterType="OaTodoItem" resultMap="OaTodoItemResult">
@@ -45,7 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertOaTodoItem" parameterType="OaTodoItem" useGeneratedKeys="true" keyProperty="todoId">
-        insert into todo_item
+        insert into oa_todo_item
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="bizType != null">biz_type,</if>
             <if test="bizId != null">biz_id,</if>
@@ -73,7 +73,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </insert>
 
     <update id="updateOaTodoItem" parameterType="OaTodoItem">
-        update todo_item
+        update oa_todo_item
         <trim prefix="SET" suffixOverrides=",">
             <if test="bizType != null">biz_type = #{bizType},</if>
             <if test="bizId != null">biz_id = #{bizId},</if>
@@ -90,11 +90,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteOaTodoItemById" parameterType="Long">
-        delete from todo_item where todo_id = #{todoId}
+        delete from oa_todo_item where todo_id = #{todoId}
     </delete>
 
     <delete id="deleteOaTodoItemByIds" parameterType="String">
-        delete from todo_item where todo_id in
+        delete from oa_todo_item where todo_id in
         <foreach item="todoId" collection="array" open="(" separator="," close=")">
             #{todoId}
         </foreach>

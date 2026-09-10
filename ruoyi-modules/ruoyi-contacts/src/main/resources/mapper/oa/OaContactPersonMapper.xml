@@ -17,7 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="selectOaContactPersonVo">
         select person_id, name, dept_id, dept_name, post, phone, email, office_phone
-        from contact_person
+        from oa_contact_person
     </sql>
 
     <select id="selectOaContactPersonList" parameterType="OaContactPerson" resultMap="OaContactPersonResult">
@@ -36,7 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertOaContactPerson" parameterType="OaContactPerson" useGeneratedKeys="true" keyProperty="personId">
-        insert into contact_person
+        insert into oa_contact_person
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="name != null">name,</if>
             <if test="deptId != null">dept_id,</if>
@@ -58,7 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </insert>
 
     <update id="updateOaContactPerson" parameterType="OaContactPerson">
-        update contact_person
+        update oa_contact_person
         <trim prefix="SET" suffixOverrides=",">
             <if test="name != null">name = #{name},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
@@ -72,11 +72,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteOaContactPersonById" parameterType="Long">
-        delete from contact_person where person_id = #{personId}
+        delete from oa_contact_person where person_id = #{personId}
     </delete>
 
     <delete id="deleteOaContactPersonByIds" parameterType="String">
-        delete from contact_person where person_id in
+        delete from oa_contact_person where person_id in
         <foreach item="personId" collection="array" open="(" separator="," close=")">
             #{personId}
         </foreach>

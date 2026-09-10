@@ -23,7 +23,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="selectOaScheduleEventVo">
         select event_id, title, event_date, start_time, end_time, location, event_type,
                create_by_id, participants
-        from schedule_event
+        from oa_schedule_event
     </sql>
 
     <select id="selectOaScheduleEventList" parameterType="OaScheduleEvent" resultMap="OaScheduleEventResult">
@@ -43,7 +43,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertOaScheduleEvent" parameterType="OaScheduleEvent" useGeneratedKeys="true" keyProperty="eventId">
-        insert into schedule_event
+        insert into oa_schedule_event
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="title != null">title,</if>
             <if test="eventDate != null">event_date,</if>
@@ -71,7 +71,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </insert>
 
     <update id="updateOaScheduleEvent" parameterType="OaScheduleEvent">
-        update schedule_event
+        update oa_schedule_event
         <trim prefix="SET" suffixOverrides=",">
             <if test="title != null">title = #{title},</if>
             <if test="eventDate != null">event_date = #{eventDate},</if>
@@ -87,11 +87,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteOaScheduleEventById" parameterType="Long">
-        delete from schedule_event where event_id = #{eventId}
+        delete from oa_schedule_event where event_id = #{eventId}
     </delete>
 
     <delete id="deleteOaScheduleEventByIds" parameterType="String">
-        delete from schedule_event where event_id in
+        delete from oa_schedule_event where event_id in
         <foreach item="eventId" collection="array" open="(" separator="," close=")">
             #{eventId}
         </foreach>

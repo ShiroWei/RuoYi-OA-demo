@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 /**
- * 通讯录人员对象 contact_person
+ * 通讯录人员对象 oa_contact_person
  * 
  * @author oa
  */

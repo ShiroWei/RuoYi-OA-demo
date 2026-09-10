@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
- * 审批申请对象 approval_apply
+ * 审批申请对象 oa_approval_apply
  * 
  * @author oa
  */

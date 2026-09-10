@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
- * 日程事件对象 schedule_event
+ * 日程事件对象 oa_schedule_event
  * 
  * @author oa
  */

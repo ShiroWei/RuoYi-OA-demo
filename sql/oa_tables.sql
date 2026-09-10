@@ -1,8 +1,8 @@
--- OA协同办公平台：办公自动化模块表结构（域前缀：approval_/schedule_/contact_/todo_）
+-- OA协同办公平台：办公自动化模块表结构（统一前缀：oa_）
 
 -- 审批申请
-DROP TABLE IF EXISTS approval_apply;
-CREATE TABLE approval_apply (
+DROP TABLE IF EXISTS oa_approval_apply;
+CREATE TABLE oa_approval_apply (
   apply_id      BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT '申请ID',
   apply_no      VARCHAR(64)  DEFAULT NULL COMMENT '申请单号',
   title         VARCHAR(200) DEFAULT NULL COMMENT '申请标题',
@@ -27,8 +27,8 @@ CREATE TABLE approval_apply (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='审批申请';
 
 -- 审批流程节点
-DROP TABLE IF EXISTS approval_flow;
-CREATE TABLE approval_flow (
+DROP TABLE IF EXISTS oa_approval_flow;
+CREATE TABLE oa_approval_flow (
   flow_id      BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT '流程ID',
   apply_id     BIGINT(20)   DEFAULT NULL COMMENT '申请ID',
   node_name    VARCHAR(64)  DEFAULT NULL COMMENT '环节名称',
@@ -41,8 +41,8 @@ CREATE TABLE approval_flow (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='审批流程节点';
 
 -- 日程事件
-DROP TABLE IF EXISTS schedule_event;
-CREATE TABLE schedule_event (
+DROP TABLE IF EXISTS oa_schedule_event;
+CREATE TABLE oa_schedule_event (
   event_id      BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT '日程ID',
   title         VARCHAR(200) DEFAULT NULL COMMENT '标题',
   event_date    DATE         DEFAULT NULL COMMENT '事件日期',
@@ -61,8 +61,8 @@ CREATE TABLE schedule_event (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='日程事件';
 
 -- 通讯录人员
-DROP TABLE IF EXISTS contact_person;
-CREATE TABLE contact_person (
+DROP TABLE IF EXISTS oa_contact_person;
+CREATE TABLE oa_contact_person (
   person_id    BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT '人员ID',
   name         VARCHAR(64)  DEFAULT NULL COMMENT '姓名',
   dept_id      BIGINT(20)   DEFAULT NULL COMMENT '部门ID',
@@ -80,8 +80,8 @@ CREATE TABLE contact_person (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='通讯录人员';
 
 -- 待办事项
-DROP TABLE IF EXISTS todo_item;
-CREATE TABLE todo_item (
+DROP TABLE IF EXISTS oa_todo_item;
+CREATE TABLE oa_todo_item (
   todo_id      BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT '待办ID',
   biz_type     VARCHAR(32)  DEFAULT NULL COMMENT '关联业务类型（approval 审批）',
   biz_id       BIGINT(20)   DEFAULT NULL COMMENT '关联业务ID',

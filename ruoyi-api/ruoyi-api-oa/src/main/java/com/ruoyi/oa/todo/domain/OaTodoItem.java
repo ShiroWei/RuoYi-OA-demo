@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
- * 待办事项对象 todo_item
+ * 待办事项对象 oa_todo_item
  * 
  * @author oa
  */
