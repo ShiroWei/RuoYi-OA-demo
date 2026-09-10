@@ -55,7 +55,18 @@ const permission = {
 
 // OA 前端与 ERP 共用 sys_menu 时，只加载 OA 业务路由，避免菜单和动态页面串线。
 function filterApplicationRoutes(routes) {
-  return (routes || []).filter(route => !String(route.path || '').startsWith('/erp'))
+  return (routes || []).reduce((result, route) => {
+    const item = { ...route }
+    const path = String(item.path || '')
+    const normalizedPath = path.replace(/^\/+/, '')
+    if (normalizedPath === 'erp' || normalizedPath.startsWith('erp/')) return result
+    if (path === 'http://localhost:8718') return result
+    if (path === 'http://localhost:8848/nacos') item.path = 'http://localhost:18088'
+    if (path === 'http://localhost:8080/swagger-ui/index.html') item.path = 'http://localhost:8000/swagger-ui/index.html'
+    if (item.children) item.children = filterApplicationRoutes(item.children)
+    result.push(item)
+    return result
+  }, [])
 }
 
 // 遍历后台传来的路由字符串，转换为组件对象
