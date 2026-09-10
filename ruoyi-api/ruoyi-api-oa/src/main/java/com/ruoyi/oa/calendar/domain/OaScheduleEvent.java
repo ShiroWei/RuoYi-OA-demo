@@ -1,6 +1,10 @@
 package com.ruoyi.oa.calendar.domain;
 
 import java.util.Date;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.web.domain.BaseEntity;
 
@@ -17,28 +21,39 @@ public class OaScheduleEvent extends BaseEntity
     private Long eventId;
 
     /** 标题 */
+    @NotBlank(message = "标题不能为空")
+    @Size(max = 200, message = "标题不能超过200个字符")
     private String title;
 
     /** 事件日期 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotNull(message = "日期不能为空")
+    @JsonFormat(pattern = "yyyy-MM-dd", lenient = com.fasterxml.jackson.annotation.OptBoolean.FALSE)
     private Date eventDate;
 
     /** 开始时间 */
+    @NotBlank(message = "开始时间不能为空")
+    @Pattern(regexp = "([01][0-9]|2[0-3]):[0-5][0-9]", message = "开始时间格式必须为HH:mm")
     private String startTime;
 
     /** 结束时间 */
+    @NotBlank(message = "结束时间不能为空")
+    @Pattern(regexp = "([01][0-9]|2[0-3]):[0-5][0-9]", message = "结束时间格式必须为HH:mm")
     private String endTime;
 
     /** 地点 */
+    @Size(max = 200, message = "地点不能超过200个字符")
     private String location;
 
     /** 类型（会议/汇报/活动） */
+    @NotBlank(message = "类型不能为空")
+    @Size(max = 32, message = "类型不能超过32个字符")
     private String eventType;
 
     /** 创建人ID */
     private Long createById;
 
     /** 参与人 */
+    @Size(max = 500, message = "参与人不能超过500个字符")
     private String participants;
 
     public Long getEventId()

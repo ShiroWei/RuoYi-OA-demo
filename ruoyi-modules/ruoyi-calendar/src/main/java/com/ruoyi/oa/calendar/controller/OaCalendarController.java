@@ -46,7 +46,8 @@ public class OaCalendarController extends BaseController
     @GetMapping("/{eventId}")
     public AjaxResult getInfo(@PathVariable Long eventId)
     {
-        return success(calendarService.selectEventById(eventId));
+        OaScheduleEvent event = calendarService.selectEventById(eventId);
+        return event == null ? error("日程不存在或已删除") : success(event);
     }
 
     /**
@@ -55,6 +56,10 @@ public class OaCalendarController extends BaseController
     @PostMapping
     public AjaxResult add(@Validated @RequestBody OaScheduleEvent event)
     {
+        if (event.getEndTime().compareTo(event.getStartTime()) <= 0)
+        {
+            return error("结束时间必须晚于开始时间");
+        }
         event.setCreateById(SecurityUtils.getUserId());
         return toAjax(calendarService.insertEvent(event));
     }
@@ -65,6 +70,14 @@ public class OaCalendarController extends BaseController
     @PutMapping
     public AjaxResult edit(@Validated @RequestBody OaScheduleEvent event)
     {
+        if (event.getEventId() == null || event.getEventId() <= 0)
+        {
+            return error("日程ID不能为空且必须为正数");
+        }
+        if (event.getEndTime().compareTo(event.getStartTime()) <= 0)
+        {
+            return error("结束时间必须晚于开始时间");
+        }
         return toAjax(calendarService.updateEvent(event));
     }
 

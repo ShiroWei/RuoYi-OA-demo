@@ -27,6 +27,10 @@ public class OaCalendarServiceImpl implements IOaCalendarService
         OaScheduleEvent query = new OaScheduleEvent();
         if (month != null && !month.isEmpty())
         {
+            if (!month.matches("[0-9]{4}-(0[1-9]|1[0-2])") || month.startsWith("0000"))
+            {
+                throw new com.ruoyi.common.core.exception.ServiceException("月份格式必须为yyyy-MM");
+            }
             query.setEventDate(com.ruoyi.common.core.utils.DateUtils.parseDate(month + "-01"));
         }
         return scheduleEventMapper.selectOaScheduleEventList(query);
