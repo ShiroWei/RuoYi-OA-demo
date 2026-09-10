@@ -84,16 +84,34 @@ public class OaApprovalServiceImpl implements IOaApprovalService
     @Transactional
     public int insertApproval(OaApprovalApply apply)
     {
-        if (apply == null || apply.getTitle() == null || apply.getTitle().trim().isEmpty()
-                || apply.getTitle().length() > 200 || apply.getContent() == null
-                || apply.getContent().trim().isEmpty() || apply.getContent().length() > 1000)
+        if (apply == null)
         {
-            throw new ServiceException("请填写有效的申请标题和事由");
+            throw new ServiceException("申请信息不能为空");
         }
         String type = apply.getApplyType();
         if (!"请假".equals(type) && !"报销".equals(type) && !"出差".equals(type))
         {
             throw new ServiceException("不支持的申请类型");
+        }
+        if (apply.getContent() == null || apply.getContent().trim().isEmpty()
+                || apply.getContent().trim().length() > 1000)
+        {
+            throw new ServiceException("请填写有效的申请事由");
+        }
+        apply.setContent(apply.getContent().trim());
+        if (apply.getTitle() == null || apply.getTitle().trim().isEmpty())
+        {
+            String applicant = apply.getApplicant() == null || apply.getApplicant().trim().isEmpty()
+                    ? "用户" : apply.getApplicant().trim();
+            apply.setTitle(applicant + "的" + type + "申请");
+        }
+        else
+        {
+            apply.setTitle(apply.getTitle().trim());
+        }
+        if (apply.getTitle().length() > 200)
+        {
+            throw new ServiceException("申请标题不能超过200个字符");
         }
         if ("报销".equals(type))
         {
