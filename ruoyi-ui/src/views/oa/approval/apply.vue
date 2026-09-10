@@ -5,7 +5,7 @@
         <span>发起申请</span>
         <el-button type="text" icon="el-icon-back" @click="$router.back()">返回</el-button>
       </div>
-      <el-form ref="applyForm" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="applyForm" :model="form" :rules="rules" label-width="100px" :disabled="submitting">
         <el-form-item label="申请类型" prop="applyType">
           <el-radio-group v-model="form.applyType">
             <el-radio-button label="请假">请假</el-radio-button>
@@ -25,7 +25,7 @@
 
         <template v-if="form.applyType === '报销'">
           <el-form-item label="报销金额" prop="amount">
-            <el-input-number v-model="form.amount" :min="0" :precision="2" :step="100" style="width: 220px" />
+            <el-input-number v-model="form.amount" :min="0.01" :precision="2" :step="100" style="width: 220px" />
           </el-form-item>
         </template>
 
@@ -63,17 +63,35 @@ export default {
         content: ''
       },
       rules: {
-        startDate: [{ required: true, message: '请选择开始日期', trigger: 'change' }],
-        endDate: [{ required: true, message: '请选择结束日期', trigger: 'change' }],
-        amount: [{ required: true, message: '请填写报销金额', trigger: 'change' }],
+        startDate: [{ validator: (rule, value, callback) => {
+          if (this.form.applyType === '报销' || value) return callback()
+          callback(new Error('请选择开始日期'))
+        }, trigger: 'change' }],
+        endDate: [{ validator: (rule, value, callback) => {
+          if (this.form.applyType === '报销' || value) return callback()
+          callback(new Error('请选择结束日期'))
+        }, trigger: 'change' }],
+        amount: [{ validator: (rule, value, callback) => {
+          if (this.form.applyType !== '报销' || (value !== null && value !== undefined && value > 0)) return callback()
+          callback(new Error('报销金额必须大于 0'))
+        }, trigger: 'change' }],
         content: [{ required: true, message: '请填写申请事由', trigger: 'blur' }]
       }
     }
   },
   methods: {
+    validateDates() {
+      if (this.form.applyType === '报销') return true
+      if (this.form.endDate < this.form.startDate) {
+        this.$modal.msgError('结束日期不能早于开始日期')
+        return false
+      }
+      return true
+    },
     handleSubmit() {
+      if (this.submitting) return
       this.$refs.applyForm.validate(valid => {
-        if (!valid) return
+        if (!valid || !this.validateDates()) return
         this.submitting = true
         const data = { ...this.form }
         if (data.applyType !== '报销' && data.startDate && data.endDate) {
@@ -81,11 +99,17 @@ export default {
           const end = new Date(data.endDate)
           data.days = Math.round((end - start) / 86400000) + 1
         }
+        if (data.applyType === '报销') {
+          data.startDate = null
+          data.endDate = null
+          data.days = null
+        } else {
+          data.amount = null
+        }
         submitApply(data).then(res => {
-          this.submitting = false
           this.$modal.msgSuccess('提交成功，单号：' + res.data.applyNo)
           this.$router.push('/oa/approval/detail/' + res.data.applyId)
-        })
+        }).catch(() => {}).finally(() => { this.submitting = false })
       })
     },
     resetForm() {

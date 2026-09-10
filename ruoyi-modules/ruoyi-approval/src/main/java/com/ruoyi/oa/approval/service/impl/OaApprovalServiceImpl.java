@@ -43,6 +43,10 @@ public class OaApprovalServiceImpl implements IOaApprovalService
         if ("todo".equals(type))
         {
             query.setStatus("0");
+            if (!Long.valueOf(1L).equals(userId))
+            {
+                return java.util.Collections.emptyList();
+            }
         }
         else if ("done".equals(type))
         {
@@ -80,6 +84,47 @@ public class OaApprovalServiceImpl implements IOaApprovalService
     @Transactional
     public int insertApproval(OaApprovalApply apply)
     {
+        if (apply == null || apply.getTitle() == null || apply.getTitle().trim().isEmpty()
+                || apply.getTitle().length() > 200 || apply.getContent() == null
+                || apply.getContent().trim().isEmpty() || apply.getContent().length() > 1000)
+        {
+            throw new ServiceException("请填写有效的申请标题和事由");
+        }
+        String type = apply.getApplyType();
+        if (!"请假".equals(type) && !"报销".equals(type) && !"出差".equals(type))
+        {
+            throw new ServiceException("不支持的申请类型");
+        }
+        if ("报销".equals(type))
+        {
+            if (apply.getAmount() == null || apply.getAmount().signum() <= 0
+                    || apply.getAmount().compareTo(new java.math.BigDecimal("99999999.99")) > 0
+                    || apply.getAmount().stripTrailingZeros().scale() > 2)
+            {
+                throw new ServiceException("报销金额必须大于零，最多两位小数且不超过99999999.99");
+            }
+            apply.setStartDate(null);
+            apply.setEndDate(null);
+            apply.setDays(null);
+        }
+        else
+        {
+            if (apply.getStartDate() == null || apply.getEndDate() == null
+                    || apply.getEndDate().before(apply.getStartDate()))
+            {
+                throw new ServiceException("请填写有效的起止日期，结束日期不能早于开始日期");
+            }
+            java.time.ZoneId zone = java.time.ZoneId.systemDefault();
+            long days = java.time.temporal.ChronoUnit.DAYS.between(
+                    apply.getStartDate().toInstant().atZone(zone).toLocalDate(),
+                    apply.getEndDate().toInstant().atZone(zone).toLocalDate()) + 1;
+            if (days > Integer.MAX_VALUE)
+            {
+                throw new ServiceException("申请日期范围过大");
+            }
+            apply.setDays((int) days);
+            apply.setAmount(null);
+        }
         apply.setApplyNo(generateApplyNo());
         apply.setStatus("0");
         apply.setCurrentNode("部门审批");
@@ -104,7 +149,7 @@ public class OaApprovalServiceImpl implements IOaApprovalService
         todo.setStatus("0");
         todo.setSubmitTime(DateUtils.getNowDate());
         R<Boolean> remote = remoteTodoService.createTodo(todo);
-        if (R.isError(remote) || !Boolean.TRUE.equals(remote.getData()))
+        if (remote == null || R.isError(remote) || !Boolean.TRUE.equals(remote.getData()))
         {
             throw new ServiceException("待办生成失败，请重试");
         }
@@ -122,6 +167,10 @@ public class OaApprovalServiceImpl implements IOaApprovalService
         if (apply == null)
         {
             return 0;
+        }
+        if (!"0".equals(apply.getStatus()) || !Long.valueOf(1L).equals(userId))
+        {
+            throw new ServiceException("无权处理该审批或审批已结束");
         }
         List<OaApprovalFlow> flows = approvalFlowMapper.selectFlowByApplyId(applyId);
         // 当前处理节点标记完成
@@ -165,8 +214,11 @@ public class OaApprovalServiceImpl implements IOaApprovalService
             apply.setCurrentNode("审批完成");
         }
         int result = approvalApplyMapper.updateOaApprovalApply(apply);
-        // 跨服务联动待办服务完成待办
-        completeTodoByApplyId(applyId);
+        if ("1".equals(apply.getStatus()))
+        {
+            // 仅终态完成待办，避免第一次通过就丢失唯一待办。
+            completeTodoByApplyId(applyId);
+        }
         return result;
     }
 
@@ -181,6 +233,10 @@ public class OaApprovalServiceImpl implements IOaApprovalService
         if (apply == null)
         {
             return 0;
+        }
+        if (!"0".equals(apply.getStatus()) || !Long.valueOf(1L).equals(userId))
+        {
+            throw new ServiceException("无权处理该审批或审批已结束");
         }
         List<OaApprovalFlow> flows = approvalFlowMapper.selectFlowByApplyId(applyId);
         for (OaApprovalFlow flow : flows)
@@ -233,7 +289,7 @@ public class OaApprovalServiceImpl implements IOaApprovalService
     private void completeTodoByApplyId(Long applyId)
     {
         R<Boolean> remote = remoteTodoService.completeTodoByApplyId(applyId);
-        if (R.isError(remote))
+        if (remote == null || R.isError(remote) || !Boolean.TRUE.equals(remote.getData()))
         {
             throw new ServiceException("完成待办失败");
         }

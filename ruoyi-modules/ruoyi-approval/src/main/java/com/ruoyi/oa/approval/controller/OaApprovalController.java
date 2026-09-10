@@ -97,7 +97,7 @@ public class OaApprovalController extends BaseController
     @DeleteMapping("/{applyIds}")
     public AjaxResult remove(@PathVariable Long[] applyIds)
     {
-        return toAjax(1);
+        return error("审批申请不支持删除");
     }
 
     /**
