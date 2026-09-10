@@ -59,7 +59,7 @@ if errorlevel 1 goto :fail
 
 call :start_jar 9200 "ruoyi-auth" "ruoyi-auth\target" "ruoyi-auth.jar"
 call :start_jar 9201 "ruoyi-system" "ruoyi-modules\ruoyi-system\target" "ruoyi-modules-system.jar"
-call :start_jar 9210 "ruoyi-approval" "ruoyi-modules\ruoyi-approval\target" "ruoyi-modules-approval.jar"
+call :start_jar 9215 "ruoyi-approval" "ruoyi-modules\ruoyi-approval\target" "ruoyi-modules-approval.jar"
 call :start_jar 9211 "ruoyi-todo" "ruoyi-modules\ruoyi-todo\target" "ruoyi-modules-todo.jar"
 call :start_jar 9212 "ruoyi-calendar" "ruoyi-modules\ruoyi-calendar\target" "ruoyi-modules-calendar.jar"
 call :start_jar 9213 "ruoyi-contacts" "ruoyi-modules\ruoyi-contacts\target" "ruoyi-modules-contacts.jar"

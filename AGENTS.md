@@ -13,7 +13,7 @@
 ## 技术栈与环境
 
 - 框架：RuoYi-Cloud v3.6.8（Spring Boot 4.0.6 / Spring Cloud Alibaba / Vue 2 + Element UI / MyBatis）。
-- 服务端口：gateway 8000、auth 9200、system 9201、gen 9202、job 9203、file 9300、monitor 9100、**OA 服务：approval 9210 / todo 9211 / calendar 9212 / contacts 9213 / portal 9214**、Nacos 8848、Redis 6379。
+- 服务端口：gateway 8000、auth 9200、system 9201、gen 9202、job 9203、file 9300、monitor 9100、**OA 服务：approval 9215 / todo 9211 / calendar 9212 / contacts 9213 / portal 9214**、Nacos 8848、Redis 6379。
 - OA 按业务功能拆分为独立微服务：`ruoyi-approval`（审批）、`ruoyi-todo`（待办）、`ruoyi-calendar`（日程）、`ruoyi-contacts`（通讯录）、`ruoyi-portal`（工作台聚合：dashboard + ai）。跨服务接口与共享 domain 在 `ruoyi-api/ruoyi-api-oa`（Feign Client，返回 `R<T>`）；审批发起/通过/驳回通过 Feign 联动 todo 服务生成/完成待办；portal 通过 Feign 聚合四业务服务做统计与智能问答。
 - 本机 Nacos 与 ERP demo 项目共享同一套 Nacos(8848)/MySQL(ry-cloud, ry-config)/Redis；网关运行配置含 ERP 拆分路由（`/erp/**`，勿删）。**8000 网关为共享资源，OA 与 ERP 都会启动 gateway 抢占 8000 端口，冲突时需停对方 gateway**。9202 被 ERP 的 `ruoyi-modules-erp` 占用，OA 的 gen 启动会端口冲突。
 - 验证码当前关闭（Nacos `ruoyi-gateway-dev.yml` 中 `security.captcha.enabled: false`），登录只需 `{username, password}`（admin/admin123）。
