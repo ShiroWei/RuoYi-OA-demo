@@ -47,7 +47,8 @@ public class OaContactsController extends BaseController
     @GetMapping("/{personId}")
     public AjaxResult getInfo(@PathVariable Long personId)
     {
-        return success(contactsService.selectContactById(personId));
+        OaContactPerson contact = contactsService.selectContactById(personId);
+        return contact == null ? error("人员不存在或已删除") : success(contact);
     }
 
     /**
@@ -65,6 +66,10 @@ public class OaContactsController extends BaseController
     @PutMapping
     public AjaxResult edit(@Validated @RequestBody OaContactPerson contact)
     {
+        if (contact.getPersonId() == null || contact.getPersonId() <= 0)
+        {
+            return error("人员ID不能为空且必须为正数");
+        }
         return toAjax(contactsService.updateContact(contact));
     }
 

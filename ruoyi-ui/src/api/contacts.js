@@ -14,3 +14,15 @@ export function listContacts(query) {
     params: query
   })
 }
+
+export function addContact(data) {
+  return request({ url: '/oa/contacts', method: 'post', data })
+}
+
+export function updateContact(data) {
+  return request({ url: '/oa/contacts', method: 'put', data })
+}
+
+export function delContact(personId) {
+  return request({ url: '/oa/contacts/' + personId, method: 'delete' })
+}
