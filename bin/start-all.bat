@@ -68,6 +68,14 @@ call :check_jar "ruoyi-modules\ruoyi-contacts\target\ruoyi-modules-contacts.jar"
 if errorlevel 1 goto :fail
 call :check_jar "ruoyi-modules\ruoyi-portal\target\ruoyi-modules-portal.jar"
 if errorlevel 1 goto :fail
+call :check_jar "ruoyi-modules\ruoyi-gen\target\ruoyi-modules-gen.jar"
+if errorlevel 1 goto :fail
+call :check_jar "ruoyi-modules\ruoyi-job\target\ruoyi-modules-job.jar"
+if errorlevel 1 goto :fail
+call :check_jar "ruoyi-modules\ruoyi-file\target\ruoyi-modules-file.jar"
+if errorlevel 1 goto :fail
+call :check_jar "ruoyi-visual\ruoyi-monitor\target\ruoyi-visual-monitor.jar"
+if errorlevel 1 goto :fail
 call :check_jar "ruoyi-gateway\target\ruoyi-gateway.jar"
 if errorlevel 1 goto :fail
 
@@ -84,6 +92,14 @@ if errorlevel 1 goto :fail
 call :start_jar 9215 "ruoyi-approval" "ruoyi-modules\ruoyi-approval\target" "ruoyi-modules-approval.jar"
 if errorlevel 1 goto :fail
 call :start_jar 9214 "ruoyi-portal" "ruoyi-modules\ruoyi-portal\target" "ruoyi-modules-portal.jar"
+if errorlevel 1 goto :fail
+call :start_jar 9202 "ruoyi-gen" "ruoyi-modules\ruoyi-gen\target" "ruoyi-modules-gen.jar"
+if errorlevel 1 goto :fail
+call :start_jar 9203 "ruoyi-job" "ruoyi-modules\ruoyi-job\target" "ruoyi-modules-job.jar"
+if errorlevel 1 goto :fail
+call :start_jar 9300 "ruoyi-file" "ruoyi-modules\ruoyi-file\target" "ruoyi-modules-file.jar"
+if errorlevel 1 goto :fail
+call :start_jar 9100 "ruoyi-monitor" "ruoyi-visual\ruoyi-monitor\target" "ruoyi-visual-monitor.jar"
 if errorlevel 1 goto :fail
 
 call :is_port_open 8000
@@ -118,7 +134,7 @@ echo [OK] OA services have been started in separate windows.
 echo [INFO] URLs: UI http://localhost, Gateway http://localhost:8000
 echo [INFO] Nacos: http://localhost:18088
 echo [INFO] Login: admin / admin123
-echo [INFO] Optional gen/job/file/monitor services are not started by this script.
+echo [INFO] System tools and monitor services are available on 9202/9203/9300/9100.
 echo [INFO] Shared Nacos/auth/system/gateway and ERP ports were intentionally preserved.
 echo.
 exit /b 0
@@ -153,6 +169,14 @@ call :check_jar "ruoyi-modules\ruoyi-contacts\target\ruoyi-modules-contacts.jar"
 if errorlevel 1 goto :fail
 call :check_jar "ruoyi-modules\ruoyi-portal\target\ruoyi-modules-portal.jar"
 if errorlevel 1 goto :fail
+call :check_jar "ruoyi-modules\ruoyi-gen\target\ruoyi-modules-gen.jar"
+if errorlevel 1 goto :fail
+call :check_jar "ruoyi-modules\ruoyi-job\target\ruoyi-modules-job.jar"
+if errorlevel 1 goto :fail
+call :check_jar "ruoyi-modules\ruoyi-file\target\ruoyi-modules-file.jar"
+if errorlevel 1 goto :fail
+call :check_jar "ruoyi-visual\ruoyi-monitor\target\ruoyi-visual-monitor.jar"
+if errorlevel 1 goto :fail
 call :check_jar "ruoyi-gateway\target\ruoyi-gateway.jar"
 if errorlevel 1 goto :fail
 if not exist "%ROOT%\ruoyi-ui\node_modules" (
@@ -168,14 +192,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$root=[regex]::Escape('%ROOT%');" ^
   "$targets=Get-CimInstance Win32_Process | Where-Object {" ^
   "  $_.CommandLine -and (" ^
-  "    $_.CommandLine -match 'ruoyi-modules-(approval|todo|calendar|contacts|portal)\.jar' -or" ^
+  "    $_.CommandLine -match 'ruoyi-modules-(approval|todo|calendar|contacts|portal|gen|job|file)\.jar' -or" ^
+  "    $_.CommandLine -match 'ruoyi-visual-monitor\.jar' -or" ^
   "    ($_.CommandLine -match 'vue-cli-service' -and $_.CommandLine -match $root)" ^
   "  )" ^
   "};" ^
   "$targets | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
 timeout /t 3 /nobreak >nul
 
-for %%P in (9211 9212 9213 9214 9215 80) do (
+for %%P in (9100 9202 9203 9211 9212 9213 9214 9215 9300 80) do (
     call :is_port_open %%P
     if not errorlevel 1 (
         echo [ERROR] Port %%P is still occupied after OA cleanup.
@@ -252,7 +277,7 @@ exit /b 1
 
 :verify_required_ports
 echo [INFO] Verifying required OA ports...
-for %%P in (8848 9200 9201 9211 9212 9213 9214 9215 8000 80) do (
+for %%P in (8848 8000 9100 9200 9201 9202 9203 9211 9212 9213 9214 9215 9300 80) do (
     call :is_port_open %%P
     if errorlevel 1 (
         echo [ERROR] Required port %%P is not listening.
@@ -277,7 +302,7 @@ exit /b 0
 :verify_nacos_services
 echo [INFO] Verifying Nacos service registrations...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$required=@('ruoyi-auth','ruoyi-system','ruoyi-todo','ruoyi-calendar','ruoyi-contacts','ruoyi-approval','ruoyi-portal','ruoyi-gateway');" ^
+  "$required=@('ruoyi-auth','ruoyi-system','ruoyi-gen','ruoyi-job','ruoyi-file','ruoyi-monitor','ruoyi-todo','ruoyi-calendar','ruoyi-contacts','ruoyi-approval','ruoyi-portal','ruoyi-gateway');" ^
   "$bad=@();" ^
   "foreach($name in $required){" ^
   "  try{$r=Invoke-RestMethod -Uri ('http://127.0.0.1:8848/nacos/v1/ns/instance/list?serviceName='+$name+'&namespaceId=public') -TimeoutSec 10;" ^
