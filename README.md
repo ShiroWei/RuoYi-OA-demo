@@ -17,7 +17,7 @@ OA协同办公平台是一套**演示性质**的办公自动化（Office Automat
 * **OA 工作台首页**：欢迎横幅统计、快捷入口、今日待办（点击直达审批详情）、今日日程、最新公告、数据图表。
 * **智能助手（演示）**：工作台右下角对话助手，支持「我的待办 / 请假 / 报销 / 出差 / 今日日程 / 同事人数 / 工作台统计」问答，返回结构化 JSON 卡片（列表 / 统计），数据来自真实业务统计；当前为规则 mock，后续可平滑接入真实大模型。
 * **后台管理**：用户、部门、岗位、角色、菜单、字典、参数、公告、日志等完整系统管理能力。
-* **按领域拆分 OA 服务**：审批 / 待办 / 日程 / 通讯录各为独立微服务（9210-9213），工作台统计与智能助手为聚合服务 `ruoyi-portal`（9214，Feign 聚合），审批与待办跨服务联动，为流程引擎等能力扩展预留空间。
+* **按领域拆分 OA 服务**：审批 / 待办 / 日程 / 通讯录各为独立微服务（审批 9215，其余 9211-9213），工作台统计与智能助手为聚合服务 `ruoyi-portal`（9214，Feign 聚合），审批与待办跨服务联动，为流程引擎等能力扩展预留空间。
 * 配套 SQL 脚本：OA 业务表 DDL + 演示数据，与若依原生脚本一并提供。
 
 ## 功能特性
@@ -48,7 +48,7 @@ graph LR
     UI[ruoyi-ui :80] --> GW[ruoyi-gateway :8000]
     GW --> AUTH[ruoyi-auth :9200]
     GW --> SYS[ruoyi-system :9201]
-    GW --> AP[ruoyi-approval :9210]
+    GW --> AP[ruoyi-approval :9215]
     GW --> TD[ruoyi-todo :9211]
     GW --> CA[ruoyi-calendar :9212]
     GW --> CO[ruoyi-contacts :9213]
@@ -99,7 +99,7 @@ oa
 │       └── ruoyi-common-swagger                      // 系统接口
 ├── ruoyi-modules         // 业务模块
 │       └── ruoyi-system                              // 系统模块 [9201]
-│       └── ruoyi-approval                            // OA 审批服务 [9210]
+│       └── ruoyi-approval                            // OA 审批服务 [9215]
 │       └── ruoyi-todo                                // OA 待办服务 [9211]
 │       └── ruoyi-calendar                            // OA 日程服务 [9212]
 │       └── ruoyi-contacts                            // OA 通讯录服务 [9213]
@@ -124,7 +124,7 @@ oa
 
 1. 初始化数据库（建库 `ry-cloud` 后依次导入）：`sql/ry_20260417.sql`、`sql/ry_config_20260611.sql`、`sql/ry_config_oa_20260819.sql`、`sql/ry_config_oa_split_20260820.sql`（OA 配置与路由拆分增量）、`sql/quartz.sql`、`sql/oa_tables.sql`（OA 业务表 DDL）。已有旧版 OA 表时不要重导 `oa_tables.sql`，应执行 `sql/oa_table_prefix_migration.sql` 保留数据并统一表名前缀。
 2. 启动 Nacos（3.0.2，默认端口 8848）：`startup.cmd -m standalone`（单机模式）。
-3. 依次启动后端微服务：`ruoyi-gateway`(8000) → `ruoyi-auth`(9200) → `ruoyi-modules-system`(9201) → OA 五个服务（approval 9210 / todo 9211 / calendar 9212 / contacts 9213 / portal 9214）→ 其他模块（gen/job/file/monitor）。
+3. 依次启动后端微服务：`ruoyi-gateway`(8000) → `ruoyi-auth`(9200) → `ruoyi-modules-system`(9201) → OA 五个服务（approval 9215 / todo 9211 / calendar 9212 / contacts 9213 / portal 9214）→ 其他模块（gen/job/file/monitor）。
 4. 前端：`cd ruoyi-ui && npm install && npm run dev`（默认端口 80，若被系统保留端口占用会回退到 8081，代理指向网关 8000）。
 
 > Nacos 配置：网关路由 `/oa/approval|todo|calendar|contacts|dashboard|ai/**` 分别指向五个 OA 服务，`/code` 已加入白名单（登录验证码）；OA 各服务数据源复用 `ry-cloud` 库。运行时配置已同步回仓库，见 `sql/ry_config_oa_split_20260820.sql`（在 `ry_config_20260611.sql` + `ry_config_oa_20260819.sql` 之后执行）。
@@ -138,7 +138,7 @@ ruoyi-ui/                  # 前端（Vue 2 + Element UI）
   src/api/                 # 业务接口（todo / approval / calendar / contacts / dashboard）
   src/views/oa/            # OA 页面（todo / approval / calendar / contacts）
   src/views/dashboard/     # OA 工作台
-ruoyi-modules/ruoyi-approval/   # OA 审批服务（端口 9210，oa_approval_apply / oa_approval_flow）
+ruoyi-modules/ruoyi-approval/   # OA 审批服务（端口 9215，oa_approval_apply / oa_approval_flow）
 ruoyi-modules/ruoyi-todo/       # OA 待办服务（端口 9211，oa_todo_item）
 ruoyi-modules/ruoyi-calendar/   # OA 日程服务（端口 9212，oa_schedule_event）
 ruoyi-modules/ruoyi-contacts/   # OA 通讯录服务（端口 9213，oa_contact_person）
@@ -159,7 +159,7 @@ docs/                      # 本地开发环境配置文档
 | OA 业务模块  | 待办中心、审批中心、会议日程、通讯录     | 已完成（真实接口 + 审批闭环） |
 | 工作台统计真实化 | 工作台统计面板与图表数据接入后端 | 已完成（统计面板/近7日趋势/类型分布/部门申请量为真实聚合；效率雷达为演示评估） |
 | 智能助手    | 工作台对话助手（待办/审批/日程/统计问答） | 已完成（规则 mock + 真实业务数据，可平滑接入大模型） |
-| 微服务拆分    | OA 按业务功能拆分为审批/待办/日程/通讯录/聚合五服务 | 已完成（9210-9214，Feign 跨服务联动） |
+| 微服务拆分    | OA 按业务功能拆分为审批/待办/日程/通讯录/聚合五服务 | 已完成（9211-9215，Feign 跨服务联动） |
 | 工作流引擎    | 接入 Flowable，实现流程引擎驱动审批 | 规划中              |
 | 交付方式     | 独立部署（每客户一套）            | 规划中              |
 
