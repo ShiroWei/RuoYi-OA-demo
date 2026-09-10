@@ -56,7 +56,7 @@ public class OaTodoController extends BaseController
     @PostMapping("/complete/{todoId}")
     public AjaxResult complete(@PathVariable Long todoId)
     {
-        return toAjax(todoService.completeTodo(todoId));
+        return error("审批待办必须通过审批流程处理");
     }
 
     /**

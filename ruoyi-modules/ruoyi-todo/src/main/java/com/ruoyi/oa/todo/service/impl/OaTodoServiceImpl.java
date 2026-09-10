@@ -30,11 +30,13 @@ public class OaTodoServiceImpl implements IOaTodoService
         Map<String, Object> stat = new HashMap<String, Object>();
         OaTodoItem pending = new OaTodoItem();
         pending.setStatus("0");
+        pending.setHandlerId(userId);
         List<OaTodoItem> pendingList = todoItemMapper.selectOaTodoItemList(pending);
         stat.put("todoCount", pendingList.size());
 
         OaTodoItem done = new OaTodoItem();
         done.setStatus("1");
+        done.setHandlerId(userId);
         stat.put("doneCount", todoItemMapper.selectOaTodoItemList(done).size());
 
         OaTodoItem apply = new OaTodoItem();
@@ -54,6 +56,7 @@ public class OaTodoServiceImpl implements IOaTodoService
         if ("done".equals(type))
         {
             query.setStatus("1");
+            query.setHandlerId(userId);
         }
         else if ("apply".equals(type))
         {
@@ -62,6 +65,7 @@ public class OaTodoServiceImpl implements IOaTodoService
         else
         {
             query.setStatus("0");
+            query.setHandlerId(userId);
         }
         return todoItemMapper.selectOaTodoItemList(query);
     }
@@ -73,7 +77,8 @@ public class OaTodoServiceImpl implements IOaTodoService
     public int completeTodo(Long todoId)
     {
         OaTodoItem todo = todoItemMapper.selectOaTodoItemById(todoId);
-        if (todo == null)
+        if (todo == null || !"0".equals(todo.getStatus())
+                || !Long.valueOf(SecurityUtils.getUserId()).equals(todo.getHandlerId()))
         {
             return 0;
         }
@@ -98,6 +103,7 @@ public class OaTodoServiceImpl implements IOaTodoService
     {
         OaTodoItem query = new OaTodoItem();
         query.setBizId(applyId);
+        query.setBizType("approval");
         query.setStatus("0");
         List<OaTodoItem> todos = todoItemMapper.selectOaTodoItemList(query);
         for (OaTodoItem todo : todos)
