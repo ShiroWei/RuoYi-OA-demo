@@ -99,19 +99,27 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
-    path: '/oa/approval',
+    path: '/oa/approval/apply',
     component: Layout,
     hidden: true,
     permissions: ['oa:approval:list'],
     children: [
       {
-        path: 'apply',
+        path: '',
         component: () => import('@/views/oa/approval/apply'),
         name: 'OaApprovalApply',
         meta: { title: '发起申请', activeMenu: '/oa/approval' }
-      },
+      }
+    ]
+  },
+  {
+    path: '/oa/approval/detail',
+    component: Layout,
+    hidden: true,
+    permissions: ['oa:approval:list'],
+    children: [
       {
-        path: 'detail/:id(\\d+)',
+        path: ':id(\\d+)',
         component: () => import('@/views/oa/approval/detail'),
         name: 'OaApprovalDetail',
         meta: { title: '审批详情', activeMenu: '/oa/approval' }
