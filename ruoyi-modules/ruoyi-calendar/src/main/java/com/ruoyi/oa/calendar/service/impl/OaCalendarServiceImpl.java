@@ -1,6 +1,7 @@
 package com.ruoyi.oa.calendar.service.impl;
 
 import java.util.List;
+import java.time.YearMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.oa.calendar.domain.OaScheduleEvent;
@@ -31,7 +32,7 @@ public class OaCalendarServiceImpl implements IOaCalendarService
             {
                 throw new com.ruoyi.common.core.exception.ServiceException("月份格式必须为yyyy-MM");
             }
-            query.setEventDate(com.ruoyi.common.core.utils.DateUtils.parseDate(month + "-01"));
+            query.setEventDate(YearMonth.parse(month).atDay(1));
         }
         return scheduleEventMapper.selectOaScheduleEventList(query);
     }

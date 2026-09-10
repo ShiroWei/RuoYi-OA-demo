@@ -1,6 +1,6 @@
 package com.ruoyi.oa.calendar.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -27,8 +27,8 @@ public class OaScheduleEvent extends BaseEntity
 
     /** 事件日期 */
     @NotNull(message = "日期不能为空")
-    @JsonFormat(pattern = "yyyy-MM-dd", lenient = com.fasterxml.jackson.annotation.OptBoolean.FALSE)
-    private Date eventDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate eventDate;
 
     /** 开始时间 */
     @NotBlank(message = "开始时间不能为空")
@@ -76,12 +76,12 @@ public class OaScheduleEvent extends BaseEntity
         this.title = title;
     }
 
-    public Date getEventDate()
+    public LocalDate getEventDate()
     {
         return eventDate;
     }
 
-    public void setEventDate(Date eventDate)
+    public void setEventDate(LocalDate eventDate)
     {
         this.eventDate = eventDate;
     }

@@ -171,11 +171,11 @@ public class OaAiServiceImpl implements IOaAiService
 
     private Map<String, Object> scheduleReply()
     {
-        String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        java.time.LocalDate today = java.time.LocalDate.now();
         List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
         for (OaScheduleEvent e : eventList())
         {
-            if (e.getEventDate() != null && today.equals(fmt(e.getEventDate(), "yyyy-MM-dd")))
+            if (today.equals(e.getEventDate()))
             {
                 Map<String, Object> it = new HashMap<String, Object>();
                 it.put("title", e.getTitle());
